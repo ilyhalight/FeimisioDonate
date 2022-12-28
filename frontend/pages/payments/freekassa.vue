@@ -7,11 +7,11 @@
 
 
   useHead({
-    title: "Freekassa · Fame Donate",
+    title: "Freekassa · Feimisio Donate",
     meta: [
       {
         name: "og:title",
-        content: "Freekassa - Fame Donate"
+        content: "Freekassa - Feimisio Donate"
       },
     ]
   });

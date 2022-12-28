@@ -7,11 +7,11 @@
 
 
   useHead({
-    title: "Enot · Fame Donate",
+    title: "Enot · Feimisio Donate",
     meta: [
       {
         name: "og:title",
-        content: "Enot - Fame Donate"
+        content: "Enot - Feimisio Donate"
       },
     ]
   });
@@ -29,7 +29,7 @@
           <input id='form-input-o' type='hidden' name='o' :value='this.steamLink'>
           <input id='form-input-s' type='hidden' name='s' :value='sign(enotSecret, shopID)'>
           <input id='form-input-cr' type='hidden' name='cr' value='RUB'>
-          <input id='form-input-c' type='hidden' name='c' value='Донат на сервера Fame'>
+          <input id='form-input-c' type='hidden' name='c' value='Донат на сервера Feimisio'>
           <input id='form-input-cf' type='hidden' name='cf[uid]' :value='this.uid'>
           <input id='form-input-cf' type='hidden' name='cf[price]' :value='this.price'>
           <input id='form-input-cf' type='hidden' name='cf[steamLink]' :value='this.steamLink'>

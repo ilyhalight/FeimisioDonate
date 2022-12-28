@@ -2,11 +2,11 @@
   import BlockLoading from "~/components/donate/BlockLoading.vue";
   import VTailwindModal from "~/components/VTailwindModal.vue";
   useHead({
-    title: "Главная · Fame Donate",
+    title: "Главная · Feimisio Donate",
     meta: [
       {
         name: "og:title",
-        content: "Главная - Fame Donate"
+        content: "Главная - Feimisio Donate"
       },
     ]
   });
