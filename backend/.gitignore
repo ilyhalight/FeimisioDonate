@@ -2,8 +2,6 @@ config/servers.json
 config/privilleges.json
 config/privilleges_info.json
 
-for_dev/
-
 # Editor
 .vscode
 
