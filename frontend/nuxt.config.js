@@ -18,16 +18,16 @@ export default defineNuxtConfig({
     },
     app: {
         head: {
-            title: 'Главная · Fame Donate',
+            title: 'Главная · Feimisio Donate',
             meta: [
                 { charset: 'utf-8' },
                 { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-                { name: 'description', content: 'Fame Donate - Сервис пожертвований для вашего сервера' },
-                { name: 'og:description', content: 'Fame Donate - Сервис пожертвований для вашего сервера' },
-                { name: 'keywords', content: 'fame, famedonate, donate, fame_donate, csgo, server, fame server, famesrv, minecraft, fame discord, fame site' },
+                { name: 'description', content: 'Feimisio Donate - Сервис пожертвований для вашего сервера' },
+                { name: 'og:description', content: 'Feimisio Donate - Сервис пожертвований для вашего сервера' },
+                { name: 'keywords', content: 'feimisio, feimisiodonate, donate, feimisio_donate, csgo, server, feimisio server, feimisiosrv, minecraft, feimisio discord, feimisio site' },
                 { name: 'og:locale', content: 'ru_RU' },
                 { name: 'og:type', content: 'website' },
-                { name: 'og:title', content: 'Главная - Fame Donate' },
+                { name: 'og:title', content: 'Главная - Feimisio Donate' },
                 { name: 'og:site_name' },
                 { name: 'og:image', content: '/favicon.svg'}
             ],
