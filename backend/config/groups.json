@@ -1,0 +1,41 @@
+{
+    "csgo": [
+        {
+            "name": "test_vip",
+            "priority": 0,
+            "gid": 0
+        },
+        {
+            "name": "ClanCreate",
+            "priority": 1,
+            "gid": 0
+        },
+        {
+            "name": "VIP",
+            "priority": 2,
+            "gid": 0
+        },
+        {
+            "name": "Premium",
+            "priority": 3,
+            "gid": 0
+        },
+        {
+            "name": "Deluxe",
+            "priority": 4,
+            "gid": 0
+        },
+        {
+            "name": "MODER",
+            "priority": 5,
+            "gid": 5,
+            "srv_group": "Модер"
+        },
+        {
+            "name": "ADMIN",
+            "priority": 6,
+            "gid": 4,
+            "srv_group": "Админ"
+        }
+    ]
+}
