@@ -10,7 +10,7 @@
               </div>
             </div>
           </NuxtLink>
-          <p>Мы не имеем никакого <br>отношения к Valve Corporation<br/><strong>FameDonate © 2022</strong></p>
+          <p>Мы не имеем никакого <br>отношения к Valve Corporation<br/><strong>FeimisioDonate © 2022</strong></p>
         </div>
         <div class="footer_links">
           <a href="https://fame-community.ru" class="footer_link">
