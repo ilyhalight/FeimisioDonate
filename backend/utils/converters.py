@@ -375,16 +375,3 @@ class TimeConverters():
         minutes = round(seconds) // 60
         seconds = round(seconds % 60)
         return days, hours, minutes, seconds
-
-
-class OtherConverter:
-    def __init__(self) -> None:
-        self.size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
-
-    def convert_size(self, size_bytes):
-        if size_bytes == 0:
-            return "0B"
-        i = int(math.floor(math.log(size_bytes, 1024)))
-        p = math.pow(1024, i)
-        s = round(size_bytes / p, 2)
-        return "%s%s" % (s, self.size_name[i])
