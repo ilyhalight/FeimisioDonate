@@ -22,7 +22,8 @@ class DbPrivillegeService:
                     `duration` INT NOT NULL,
                     `discount` INT NOT NULL,
                     `short_description` VARCHAR(512),
-                    `description` VARCHAR(3000)
+                    `description` VARCHAR(3000),
+                    `disabled` BOOLEAN DEFAULT FALSE
                 )""")
                 return True
         except AttributeError as err:
@@ -34,7 +35,7 @@ class DbPrivillegeService:
         finally:
             db.close() if db else None
 
-    async def add_privillege(self, name: str, price: int, link: str, duration: int, discount: int, short_description: str, description: str):
+    async def add_privillege(self, name: str, price: int, link: str, duration: int, discount: int, short_description: str, description: str, disabled: bool):
         """Добавляет привилегию в базу данных
 
         Args:
@@ -45,6 +46,7 @@ class DbPrivillegeService:
             discount: скидка на привилегию
             short_description: короткое описание привилегии ("Вы получите")
             description: описание блока страницы с описанием привилегии
+            disabled: включена ли привилегия
 
         Returns:
             True: Если удалось добавить привилегию
@@ -53,7 +55,7 @@ class DbPrivillegeService:
         db = await DefaultConnector().connect()
         try:
             async with db.cursor() as cursor:
-                await cursor.execute('INSERT INTO `fd_privillege` (`name`, `price`, `link`, `duration`, `discount`, `short_description`, `description`) VALUES (%s, %s, %s, %s, %s, %s, %s)', (name, price, link, duration, discount, short_description, description))
+                await cursor.execute('INSERT INTO `fd_privillege` (`name`, `price`, `link`, `duration`, `discount`, `short_description`, `description`, `disabled`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)', (name, price, link, duration, discount, short_description, description, disabled))
                 await db.commit()
                 return True
         except AttributeError as err:
@@ -104,19 +106,20 @@ class DbPrivillegeService:
             None: Если произошла ошибка
         """
         db = await DefaultConnector().connect()
+        disabled = False
         try:
             async with db.cursor() as cursor:
                 if uid and type(uid) == int:
-                    await cursor.execute('SELECT * FROM `fd_privillege` WHERE `uid` = %s', (uid,))
+                    await cursor.execute('SELECT * FROM `fd_privillege` WHERE `uid` = %s AND `disabled` = %s', (uid, disabled))
                     result = await cursor.fetchone()
                 elif name and type(name) == str:
-                    await cursor.execute('SELECT * FROM `fd_privillege` WHERE `name` = %s', (name,))
+                    await cursor.execute('SELECT * FROM `fd_privillege` WHERE `name` = %s AND `disabled` = %s', (name, disabled))
                     result = await cursor.fetchone()
                 elif link and type(link) == str:
-                    await cursor.execute('SELECT * FROM `fd_privillege` WHERE `link` = %s', (link,))
+                    await cursor.execute('SELECT * FROM `fd_privillege` WHERE `link` = %s AND `disabled` = %s', (link, disabled))
                     result = await cursor.fetchone()
                 else:
-                    await cursor.execute('SELECT * FROM `fd_privillege`')
+                    await cursor.execute('SELECT * FROM `fd_privillege` WHERE `disabled` = %s', (disabled, ))
                     result = await cursor.fetchall()
                 return result
         except AttributeError as err:
