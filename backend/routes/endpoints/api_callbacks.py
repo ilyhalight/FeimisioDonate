@@ -1,12 +1,16 @@
 import logging
 import os
+import time
 from fastapi import APIRouter, status, Form, Header
 from fastapi.responses import JSONResponse
+from aiogram.utils.markdown import escape_md
 
+from sql.promocode_uses.service import DbPromocodeUsesService
 from logger.masslog import MassLog
-from utils.db import find_privilleges_json
+from utils.db import find_privilleges_json, find_promocodes_json
 from utils.sign import sign
 from utils.give import giver_csgo
+from utils.converters import SteamConverters
 
 router = APIRouter()
 log = logging.getLogger('server')
@@ -58,11 +62,11 @@ currencies = {
 }
 
 
-@router.post('/api/callback/freekassa', response_class = JSONResponse, summary = 'Callback for freekassa payments', responses = payment_methods_responses)
+@router.post('/freekassa', response_class = JSONResponse, summary = 'Callback for freekassa payments', responses = payment_methods_responses)
 async def index(
     MERCHANT_ID: int = Form(), AMOUNT: int = Form(), intid: int = Form(), MERCHANT_ORDER_ID: int|str = Form(),
     P_EMAIL: str = Form(default = None), P_PHONE: str = Form(default = None), CUR_ID: int = Form(), SIGN: str = Form(), us_uid: str = Form(),
-    us_price: int = Form(), us_steamLink: str = Form(), payer_account: str = Form(default = None), commission: int|float|str = Form(),
+    us_price: int = Form(), us_steamLink: str = Form(), us_promoCode: str = Form(), payer_account: str = Form(default = None), commission: int|float|str = Form(),
     HTTP_X_REAL_IP: str = Header(default = None), REMOTE_ADDR: str = Header(default = None)
     ):
     """
@@ -82,17 +86,13 @@ async def index(
         us_uid: UID пользователя
         us_price: Цена привилегии
         us_steamLink: Ссылка на профиль Steam
+        us_promoCode: Промокод
     Args (Headers):
-        HTTP_X_REAL_IP 	IP адрес плательщика
-        REMOTE_ADDR 	IP адрес плательщика
+        HTTP_X_REAL_IP 	IP адрес
+        REMOTE_ADDR 	IP адрес
 
     """
     log.info(f'Callback for freekassa payments: {locals()}')
-    # if HTTP_X_REAL_IP:
-    #     req_ip = HTTP_X_REAL_IP
-    # else:
-    #     req_ip = REMOTE_ADDR
-    # req_ip in ['168.119.157.136', '168.119.60.227', '138.201.88.124', '178.154.197.79'] and
     if str(MERCHANT_ID) == os.environ.get('FREEKASSA_SHOPID'):
         log.debug('IP is valid')
         server_sign = sign(MERCHANT_ID, AMOUNT, os.environ.get('FREEKASSA_SECRET'), MERCHANT_ORDER_ID)
@@ -120,8 +120,18 @@ async def index(
                 steam_link = f'https://steamcommunity.com/{part}/{us_steamLink_arr[1]}'
             else:
                 steam_link = us_steamLink
-            await MassLog().success(f'[Пользователь]({steam_link}) оплатил привилегию **{privilleges["name"]}** \({us_uid}\) за **{AMOUNT}** руб\. \(комиссия: **{commission}**) через FreeKassa \(Метод: **{currency}**\)')
+            await MassLog().success(f'[Пользователь]({steam_link}) оплатил привилегию **{escape_md(privilleges["name"])}** \({us_uid}\) за **{escape_md(AMOUNT)}** руб\. \(комиссия: **{escape_md(commission)}**) через FreeKassa \(Метод: **{escape_md(currency)}**\ | Промокод: **{escape_md(us_promoCode)}**)')
             res = await giver_csgo(us_uid, steam_link)
+            steamid64 = SteamConverters().url_to_steam64(steam_link)
+            steamid = SteamConverters().to_steamID(steamid64)
+            promocode = await find_promocodes_json(us_promoCode)
+            if us_promoCode != '' and len(promocode) > 0:
+                try:
+                    await DbPromocodeUsesService().add(us_promoCode, steamid, us_uid, time.time())
+                    log.info(f'Added promocode {us_promoCode} usages to Database')
+                except Exception:
+                    await MassLog().success(f'Произошла ошибка при добавление использования промокода {escape_md(us_promoCode)} в Базу Данных\. \([Пользователь]({steam_link})**, привилегия: {escape_md(privilleges["name"])}** \({us_uid}\), цена: **{escape_md(AMOUNT)}** руб\. \(комиссия: **{escape_md(commission)}**) через FreeKassa \(Метод: **{escape_md(currency)}**\)')
+                    log.exception('Error while adding usage to promo')
             if res:
                 return JSONResponse(content = {'auth': 'OK', 'status': res['status'], 'message': res['web']}, status_code = status.HTTP_200_OK)
             else:
