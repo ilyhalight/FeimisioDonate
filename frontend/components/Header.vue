@@ -8,7 +8,7 @@
               <img alt="logo" src="~/assets/images/logo.svg" />
             </div>
           </div>
-          FameDonate
+          FeimisioDonate
         </NuxtLink>
       </div>
       <div class="navbar-end">
