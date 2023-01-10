@@ -15,14 +15,6 @@ class TelegramLogger:
         self.disable_notification = self.telegram_cfg['disable_notification']
         self.token = os.environ.get('TELEGRAM_TOKEN')
 
-    # def escape_specialchars(self, message: str):
-    #     """Экранирует спецсимволы в сообщении"""
-    #     message = message.replace('(', '\\(')
-    #     message = message.replace(')', '\\)')
-    #     message = message.replace('.', '\\.')
-    #     message = message.replace('|', '\\|')
-    #     return message
-
     async def log_default(self, message: str):
         """Отправляет сообщение в Telegram
         
