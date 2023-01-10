@@ -1,10 +1,13 @@
 import logging
+
 from fastapi_utils.tasks import repeat_every
 
 from core.app import app
 from sql.privillege.controller import DbPrivillegeController
 from sql.privillege_info.controller import DbPrivillegeInfoController
-from utils.db import save_privilleges_to_json, save_privilleges_info_to_json
+from sql.promocode_uses.controller import DbPromocodeUsesController
+from sql.promocodes.controller import DbPromocodesController
+from utils.db import save_privilleges_to_json, save_privilleges_info_to_json, save_promocodes_to_json
 
 
 log = logging.getLogger('worker')
@@ -15,6 +18,8 @@ def init_worker():
         log.info('Worker started')
         await DbPrivillegeController().init()
         await DbPrivillegeInfoController().init()
+        await DbPromocodesController().init()
+        await DbPromocodeUsesController().init()
         log.info('DB initialized')
 
     @app.on_event("startup")
@@ -22,3 +27,4 @@ def init_worker():
     async def worker():
         await save_privilleges_to_json()
         await save_privilleges_info_to_json()
+        await save_promocodes_to_json()
