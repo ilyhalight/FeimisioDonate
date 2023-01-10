@@ -1,6 +1,7 @@
 <script setup>
   import BlockLoading from "~/components/donate/BlockLoading.vue";
   import VTailwindModal from "~/components/VTailwindModal.vue";
+
   useHead({
     title: "Главная · Feimisio Donate",
     meta: [
@@ -20,14 +21,13 @@
           <div v-for="donate in donateList" :key="donate.uid" class="donate_block">
             <p class="donate_title">{{ donate.name }}</p>
             <p class="donate_price" v-html="getFinalPrice(donate.duration, donate.price, donate.discount)"></p>
-            <!-- TODO: Доделать показ срока и скидки -->
             <div class="text-xl mt-4 mb-4">Вы получите доступ к:
                 <ul class="donate_features">
                   <li v-for="feature in donate.short_description.split(';')" :key="feature">{{ feature }}</li>
                 </ul>   
                 <a class="donate_link" :bind="donate.link" :href="'/info/'+donate.link" target="_blank">Подробнее...</a>
             </div>
-            <label :key="donate.uid" :id="'buy_'+donate.uid" class="donate_btn" @click="selected.uid = donate.uid; selected.name = donate.name; modalShow = true">Приобрести</label>
+            <label :key="donate.uid" :id="'buy_'+donate.uid" class="donate_btn" @click="selected.uid = donate.uid; selected.name = donate.name; selected.price = donate.price; promoCode = ''; modalShow = true">Приобрести</label>
           </div>
         </template>
         <template v-else>
@@ -36,7 +36,7 @@
     </section>
     <div>
       <v-tailwind-modal v-model="modalShow" @cancel="cancelModal">
-        <form class="-mt-2" method="post" action="https://donate.fame-community.ru/api/payments-methods">
+        <form class="-mt-2" method="post" action="http://localhost:3312/api/payments-methods">
           <p class="text-center text-xl font-bold">Покупка {{ selected.name }}</p>
           <div class="mt-4">
             <label class="block mb-2" for="steam_link">
@@ -45,10 +45,19 @@
             <label class="text-error hidden" id="steam_link_error" for="steam_link">
               Ссылка не введена
             </label>
-            <input v-model="steamLink" class="text_input" id="steam_link" name="steam_link" type="url" placeholder="https://steamcommunity.com/id/ToilOfficial" autocomplete="on" required>
-            <!-- TODO: Добавить платежки -->
+            <input v-model="steamLink" class="text_input" id="steam_link" name="steam_link" type="url" placeholder="https://steamcommunity.com/id/EXAMPLE" autocomplete="on" required>
             <input type="hidden" :value="selected.uid" name="uid">
             <input type="hidden" :value="selectedAggregator" name="aggregator">
+            <label class="block mb-2 mt-4" for="promocode">
+              Введите промокод (если есть)
+            </label>
+            <label class="text-error hidden" id="promocode_error" for="promocode">
+              Промокод не найден
+            </label>
+            <label class="text-success hidden" id="promocode_success" for="promocode">
+              Промокод найден (Скидка: {{ promoCodeDiscount }}%)
+            </label>
+            <input v-model="promoCode" class="text_input" id="promocode" name="promocode" type="text" placeholder="Промокод" autocomplete="off">
             <p class="block mt-4">Выберите платежную систему:</p>
             <div class="flex flex-wrap justify-between" id="aggregators">
               <div class="aggregator_btn active" id="freekassa" @click="selectedAggregator = 'freekassa'">
@@ -61,15 +70,8 @@
                 <img src="~/assets/images/aggregators/crystalpay.png" alt="crystalpay" width="100" height="32">
               </div>
             </div>
-            <!-- <label class="block mb-2 mt-4" for="promocode">
-              Введите промокод (если есть)
-            </label>
-            <label class="text-error hidden" id="promocode_error" for="promocode">
-              Промокод не найден
-            </label>
-            <input v-model="promoCode" class="text_input" id="promocode" name="Ссылка на Steam профиль" type="text" placeholder="Промокод" autocomplete="off"> -->
             <div class="modal-action">
-              <input type="submit" class="donate_btn" @click="confirmModal" value="Приобрести">
+              <input type="submit" id="donate_btn" class="donate_btn" @click="confirmModal" value="Приобрести">
             </div>
           </div>
         </form>
@@ -79,27 +81,45 @@
 </template>
 
 <script>
+import * as shajs from 'sha.js';
 export default {
   data() {
     return {
       donateList: [],
+      promoCodeList: [],
       selectedAggregator: 'freekassa',
       steamLink: '',
       promoCode: '',
+      promoCodeDiscount: 0,
       modalShow: false,
       selected: {
         uid: 1,
         name: 'VIP',
+        price: 100000
       }
     }
   },
 
   created: async function() {
-    const data = await $fetch(
-      "https://donate.fame-community.ru/api/privilleges"
+
+    const privillegeData = await $fetch(
+      "http://localhost:3312/api/privilleges"
     );
-    if (data) {
-      this.donateList = data;
+    if (privillegeData) {
+      this.donateList = privillegeData;
+    }
+
+    let timestamp = Math.floor(Date.now() / 1000)
+    const token = await shajs('sha256').update(`${this.$config.public.feimisioPromocodesKey}${this.$config.public.feimisioToken}${timestamp}`).digest('hex');
+    const promoCodeData = await $fetch(
+      "http://localhost:3312/api/promocodes", {
+        headers: {
+          "Authorization": `${timestamp},${token}`
+        }
+      }
+    );
+    if (promoCodeData) {
+      this.promoCodeList = promoCodeData;
     }
   },
 
@@ -174,14 +194,58 @@ export default {
         steamLinkError.classList.remove('hidden');
       }
     },
-    // promoCode() {
-    //   let promoCodeError = document.getElementById('promocode_error');
-    //   if (this.promoCode) {
-    //     promoCodeError.classList.remove('hidden');
-    //   } else {
-    //     promoCodeError.classList.add('hidden');
-    //   }
-    // }
+    async promoCode() {
+      let promoCodeError = document.getElementById('promocode_error');
+      let promoCodeSuccess = document.getElementById('promocode_success');
+      let donateBtn = document.getElementById('donate_btn');
+      let promoCodeInput = document.getElementById('promocode');
+      promoCodeInput.value = this.promoCode;
+      if (this.promoCode === '') {
+        promoCodeError.classList.add('hidden');
+        promoCodeSuccess.classList.add('hidden');
+        donateBtn.disabled = false;
+        return;
+      }
+      for (let i = 0; i < this.promoCodeList.length; i++) {
+        let currentPromo = this.promoCodeList[i];
+        if (currentPromo.key == this.promoCode) {
+          if (this.selected.price <= currentPromo.min_price || this.selected.price > currentPromo.max_price) {
+            donateBtn.disabled = true;
+            promoCodeError.classList.remove('hidden');
+            promoCodeError.innerText = 'Промокод не может быть применен к этой привилегии';
+            promoCodeSuccess.classList.add('hidden');
+          } else {
+            let timestamp = Math.floor(Date.now() / 1000)
+            const token = await shajs('sha256').update(`${this.$config.public.feimisioPromocodesKey}${this.$config.public.feimisioToken}${timestamp}`).digest('hex');
+            const promoCodeUsagesData = await $fetch(
+              `http://localhost:3312/api/promocodes/uses?promo=${currentPromo.key}`, {
+                headers: {
+                  "Authorization": `${timestamp},${token}`
+                }
+              }
+            );
+            if (promoCodeUsagesData.length >= currentPromo.uses) {
+              donateBtn.disabled = true;
+              promoCodeError.innerText = 'Превышено количество использований этого промокода';
+              promoCodeError.classList.remove('hidden');
+              promoCodeSuccess.classList.add('hidden');
+            } else {
+              this.promoCodeDiscount = currentPromo.discount;
+              promoCodeError.classList.add('hidden');
+              promoCodeSuccess.classList.remove('hidden');
+              donateBtn.disabled = false;
+            }
+          }
+
+          break;
+        } else {
+          donateBtn.disabled = true;
+          promoCodeError.classList.remove('hidden');
+          promoCodeError.innerText = 'Промокод не найден';
+          promoCodeSuccess.classList.add('hidden');
+        }
+      }
+    },
   }
 }
 </script>
