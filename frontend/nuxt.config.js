@@ -24,7 +24,7 @@ export default defineNuxtConfig({
                 { name: 'viewport', content: 'width=device-width, initial-scale=1' },
                 { name: 'description', content: 'Feimisio Donate - Сервис пожертвований для вашего сервера' },
                 { name: 'og:description', content: 'Feimisio Donate - Сервис пожертвований для вашего сервера' },
-                { name: 'keywords', content: 'feimisio, feimisiodonate, donate, feimisio_donate, csgo, server, feimisio server, feimisiosrv, minecraft, feimisio discord, feimisio site' },
+                { name: 'keywords', content: 'fame, famedonate, donate, fame_donate, csgo, server, fame server, famesrv, minecraft, fame discord, fame site' },
                 { name: 'og:locale', content: 'ru_RU' },
                 { name: 'og:type', content: 'website' },
                 { name: 'og:title', content: 'Главная - Feimisio Donate' },
@@ -53,7 +53,9 @@ export default defineNuxtConfig({
             enotShopID: process.env.ENOT_SHOPID,
             freekassaSecret: process.env.FREEKASSA_SECRET,
             freekassaShopID: process.env.FREEKASSA_SHOPID,
-        }
+            feimisioToken: process.env.FEIMISIO_TOKEN,
+            feimisioPromocodesKey: process.env.FEIMISIO_PROMOCODES_KEY
+        },
     },
     env: {
         baseUrl: `http://0.0.0.0:${process.env.PORT}` || 'http://localhost:3000',
