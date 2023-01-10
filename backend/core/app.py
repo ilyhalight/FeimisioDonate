@@ -7,9 +7,9 @@ def custom_openapi():
     if app.openapi_schema:
         return app.openapi_schema
     openapi_schema = get_openapi(
-        title="FameDonate",
+        title="FeimisioDonate",
         version="1.0.0",
-        description="FameDonate API Docs",
+        description="FeimisioDonate API Docs",
         terms_of_service="/terms/",
         license_info = {
             "name": "MIT",
