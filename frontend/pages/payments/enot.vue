@@ -33,6 +33,7 @@
           <input id='form-input-cf' type='hidden' name='cf[uid]' :value='this.uid'>
           <input id='form-input-cf' type='hidden' name='cf[price]' :value='this.price'>
           <input id='form-input-cf' type='hidden' name='cf[steamLink]' :value='this.steamLink'>
+          <input id='form-input-cf' type='hidden' name='cf[promoCode]' :value='this.promoCode'>
           <!-- <input id='form-input-success_url' type='hidden' name='success_url' value=''> -->
           <!-- <input id='form-input-fail_url' type='hidden' name='fail_url' value=''> -->
           <input class='donate_btn' id='form-input-submit' type="submit" value="Перейти"/>
@@ -49,7 +50,8 @@
         uid: 0,
         price: 10000000,
         steamLink: '',
-        payID: ''
+        payID: '',
+        promoCode: ''
       };
     },
 
@@ -71,6 +73,11 @@
         if (windowData.steam) {
           this.steamLink = windowData.steam;
           console.log(this.steamLink);
+        }
+
+        if (windowData.promocode) {
+          this.promoCode = windowData.promocode;
+          console.log(this.promoCode);
         }
 
         if (this.uid > 0) {
