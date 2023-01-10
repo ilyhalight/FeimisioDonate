@@ -1,6 +1,8 @@
 import time
 import uuid
 
+from aiogram.utils.markdown import escape_md
+
 from config.load import load_json
 from logger.masslog import MassLog
 from utils.converters import SteamConverters
@@ -45,7 +47,7 @@ async def giver_csgo(privillege_uid: int, steamlink: str):
             return db_status
         await MassLog().log_by_type(db_status['status'], db_status['logs']) 
         return status
-    await MassLog().error(f'Произошла ошибка при добавлении привилегии на сервере CS\:GO\.\n\nПроверьте правильность введенных данных: {privillege_uid} \(данные о привилегии\: {privillege}\)\, {steamlink} \(steamid\: {steamid}\)')
+    await MassLog().error(f'Произошла ошибка при добавлении привилегии на сервере CS\:GO\.\n\nПроверьте правильность введенных данных: {privillege_uid} \(данные о привилегии\: {escape_md(privillege)}\)\, {escape_md(steamlink)} \(steamid\: {escape_md(steamid)}\)')
     return False
 
 async def give_on_csgo_server(steamid: int, name: str, group: str, seconds: int):
@@ -78,7 +80,7 @@ async def give_on_csgo_server(steamid: int, name: str, group: str, seconds: int)
                         }
                 return {
                     'status': 'success',
-                    'logs': f'Привилегия {group} была успешно выдана [игроку](https://steamcommunity.com/profiles/{account_id})\.\nПривилегия действует до {expires}\.\n\nПривилегия выдана на сервере {server["ip"]}\:{server["port"]}',
+                    'logs': f'Привилегия {group} была успешно выдана [игроку](https://steamcommunity.com/profiles/{account_id})\.\nПривилегия действует до {expires}\.\n\nПривилегия выдана на сервере {escape_md(server["ip"])}\:{server["port"]}',
                     'web': f'Привилегия {group} была успешно выдана.\n\nВаша привилегия действует до {expires}.'
                 }
     return False
@@ -101,7 +103,7 @@ async def give_csgo_database(account_id: int, name: str, group: str, expires: in
         if current_group_level == -1 and group_level == -1:
             return {
                 'status': 'error',
-                'logs': f'[Пользователь](https://steamcommunity.com/profiles/[U:1:{account_id}]) попытался выдать неизвестную привилегию {group}\!',
+                'logs': f'[Пользователь](https://steamcommunity.com/profiles/[U:1:{account_id}]) попытался выдать неизвестную привилегию {escape_md(group)}\!',
                 'web': 'Неизвестная привилегия'
             }
         elif current_group_level == -1 and group_level != -1:
