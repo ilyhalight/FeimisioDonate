@@ -66,7 +66,7 @@ currencies = {
 async def index(
     MERCHANT_ID: int = Form(), AMOUNT: int = Form(), intid: int = Form(), MERCHANT_ORDER_ID: int|str = Form(),
     P_EMAIL: str = Form(default = None), P_PHONE: str = Form(default = None), CUR_ID: int = Form(), SIGN: str = Form(), us_uid: str = Form(),
-    us_price: int = Form(), us_steamLink: str = Form(), us_promoCode: str = Form(), payer_account: str = Form(default = None), commission: int|float|str = Form(),
+    us_price: int = Form(), us_steamLink: str = Form(), us_promoCode: str = Form(default=""), payer_account: str = Form(default = None), commission: int|float|str = Form(),
     HTTP_X_REAL_IP: str = Header(default = None), REMOTE_ADDR: str = Header(default = None)
     ):
     """
@@ -120,7 +120,7 @@ async def index(
                 steam_link = f'https://steamcommunity.com/{part}/{us_steamLink_arr[1]}'
             else:
                 steam_link = us_steamLink
-            await MassLog().success(f'[Пользователь]({steam_link}) оплатил привилегию **{escape_md(privilleges["name"])}** \({us_uid}\) за **{escape_md(AMOUNT)}** руб\. \(комиссия: **{escape_md(commission)}**) через FreeKassa \(Метод: **{escape_md(currency)}**\ | Промокод: **{escape_md(us_promoCode)}**)')
+            await MassLog().success(f'[Пользователь]({steam_link}) оплатил привилегию **{escape_md(privilleges["name"])}** \({us_uid}\) за **{escape_md(AMOUNT)}** руб\. \(комиссия: **{escape_md(commission)}**\) через FreeKassa \(Метод: **{escape_md(currency)}**\ \| Промокод: **{escape_md(us_promoCode)}**\)')
             res = await giver_csgo(us_uid, steam_link)
             steamid64 = SteamConverters().url_to_steam64(steam_link)
             steamid = SteamConverters().to_steamID(steamid64)
