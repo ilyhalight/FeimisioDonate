@@ -27,10 +27,10 @@ class DefaultConnector:
                                     )
             return db
         except aiomysql.OperationalError as err:
-            self.log.error('Failed to connect to database \"Can`t connect to MySQL Server\"')
+            self.log.error('Failed to connect to database "Can`t connect to MySQL Server"')
             return False
         except Exception as err:
-            self.log.error('Failed to connect to database \"Raw reason\"')
+            self.log.error('Failed to connect to database "Raw reason"')
             self.log.exception(f'Failed to connect to database: {err}')
             return None
 
