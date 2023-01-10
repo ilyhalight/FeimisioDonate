@@ -1,6 +1,7 @@
 config/servers.json
 config/privilleges.json
 config/privilleges_info.json
+config/promocodes.json
 
 # Editor
 .vscode
