@@ -7,6 +7,7 @@
         "start": "nuxt start"
     },
     "dependencies": {
+        "crypto-js": "^4.1.1",
         "nuxt": "^3.0.0",
         "sha.js": "^2.4.11",
         "uuid": "^9.0.0",

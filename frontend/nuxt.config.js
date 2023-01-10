@@ -24,7 +24,7 @@ export default defineNuxtConfig({
                 { name: 'viewport', content: 'width=device-width, initial-scale=1' },
                 { name: 'description', content: 'Feimisio Donate - Сервис пожертвований для вашего сервера' },
                 { name: 'og:description', content: 'Feimisio Donate - Сервис пожертвований для вашего сервера' },
-                { name: 'keywords', content: 'fame, famedonate, donate, fame_donate, csgo, server, fame server, famesrv, minecraft, fame discord, fame site' },
+                { name: 'keywords', content: 'feimisio, feimisiodonate, donate, feimisio_donate, csgo, server, fame server, famesrv, minecraft, feimisio discord, feimisio site' },
                 { name: 'og:locale', content: 'ru_RU' },
                 { name: 'og:type', content: 'website' },
                 { name: 'og:title', content: 'Главная - Feimisio Donate' },
