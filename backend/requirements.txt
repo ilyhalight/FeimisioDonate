@@ -10,3 +10,4 @@ rcon>=2.3.8
 python-multipart>=6.0.5
 lxml>=4.9.2
 uuid>=1.30
+aiogram>=2.24
