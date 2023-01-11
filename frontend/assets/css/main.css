@@ -183,5 +183,9 @@
 }
 
 .text_input {
-  @apply shadow appearance-none rounded-lg w-full py-2 px-3 focus:outline-none
+  @apply shadow appearance-none rounded-lg w-full py-2 px-3 focus:outline-none;
+}
+
+.loading_default {
+  @apply mt-2 h-6 bg-neutral rounded;
 }
