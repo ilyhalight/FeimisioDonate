@@ -59,7 +59,7 @@ async def index(steam_link: str = Form(), uid: int = Form(), aggregator: str = F
         else:
             return JSONResponse(content = {'error': 'Not valid uid'}, status_code = status.HTTP_404_NOT_FOUND)
         if price > 0:
-            await MassLog().info(f'[Пользователь]({steam_link}) создал ссылку на оплату **{escape_md(privillege_name)}** \(UID: **{uid}**\) за **{escape_md(price)}** руб\. \(скидка: **{escape_md(discount)}**% \| платежка: {escape_md(aggregator)}\ \| промокод: {escape_md(promocode)}\)')
+            await MassLog().info(f'[Пользователь]({steam_link}) создал ссылку на оплату **{escape_md(privillege_name)}** \(UID: **{uid}**\) за **{escape_md(price)}** руб\. \(скидка: **{escape_md(discount)}**% \| платежка: **{escape_md(aggregator)}** \| промокод: **{escape_md(promocode)}**\)')
             if 'id' in steam_link:
                 steam_arr = steam_link.split('/id/')
                 steam_arr = f'id{steam_arr[-1]}'
@@ -80,7 +80,9 @@ async def index(steam_link: str = Form(), uid: int = Form(), aggregator: str = F
                         's': crystalpay_secret,
                         'amount': price,
                         'lifetime': 30,
-                        'extra': f'{uid},{price},{steam_arr}'
+                        'redirect': 'https://donate.fame-community.ru/results/success',
+                        'callback': 'https://donate.fame-community.ru/api/callback/crystalpay',
+                        'extra': f'{uid},{price},{steam_arr},{promocode}'
                     }) as resp:
                         data = await resp.json()
                         if data and data['auth'] == 'ok' and data['error'] == False and data['url'] != '':
