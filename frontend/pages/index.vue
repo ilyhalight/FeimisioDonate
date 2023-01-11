@@ -36,7 +36,7 @@
       </section>
       <div>
         <v-tailwind-modal v-model="modalShow" @cancel="cancelModal">
-          <form class="-mt-2" method="post" action="http://localhost:3312/api/payments-methods">
+          <form class="-mt-2" method="post" action="https://donate.fame-community.ru/api/payments-methods">
             <p class="text-center text-xl font-bold">Покупка {{ selected.name }}</p>
             <div class="mt-4">
               <label class="block mb-2" for="steam_link">
@@ -81,6 +81,7 @@
 </template>
 
 <script>
+import shajs from 'sha.js';
 export default {
   data() {
     return {
@@ -102,16 +103,16 @@ export default {
   created: async function() {
 
     const privillegeData = await $fetch(
-      "http://localhost:3312/api/privilleges"
+      "https://donate.fame-community.ru/api/privilleges"
     );
     if (privillegeData) {
       this.donateList = privillegeData;
     }
 
     let timestamp = Math.floor(Date.now() / 1000)
-    const token = await sha256(`${this.$config.public.feimisioPromocodesKey}${this.$config.public.feimisioToken}${timestamp}`);
+    const token = await shajs('sha256').update(`${this.$config.public.feimisioPromocodesKey}${this.$config.public.feimisioToken}${timestamp}`).digest('hex');
     const promoCodeData = await $fetch(
-      "http://localhost:3312/api/promocodes", {
+      "https://donate.fame-community.ru/api/promocodes", {
         headers: {
           "Authorization": `${timestamp},${token}`
         }
@@ -123,20 +124,6 @@ export default {
   },
 
   methods: {
-    async sha256(message) {
-        // encode as UTF-8
-        const msgBuffer = new TextEncoder().encode(message);                    
-
-        // hash the message
-        const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-
-        // convert ArrayBuffer to Array
-        const hashArray = Array.from(new Uint8Array(hashBuffer));
-
-        // convert bytes to hex string                  
-        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-        return hashHex;
-    },
     normalizePrice(price, discount) {
       if (price === 0) {
         return "Бесплатно";
@@ -229,9 +216,9 @@ export default {
             promoCodeSuccess.classList.add('hidden');
           } else {
             let timestamp = Math.floor(Date.now() / 1000)
-            const token = await sha256(`${this.$config.public.feimisioPromocodesKey}${this.$config.public.feimisioToken}${timestamp}`);
+            const token = await shajs('sha256').update(`${this.$config.public.feimisioPromocodesKey}${this.$config.public.feimisioToken}${timestamp}`).digest('hex');
             const promoCodeUsagesData = await $fetch(
-              `http://localhost:3312/api/promocodes/uses?promo=${currentPromo.key}`, {
+              `https://donate.fame-community.ru/api/promocodes/uses?promo=${currentPromo.key}`, {
                 headers: {
                   "Authorization": `${timestamp},${token}`
                 }
