@@ -179,36 +179,14 @@ export default {
     },
     cancelModal(close) {
       this.modalShow = false;
-    }
-  },
-
-  watch: {
-    selectedAggregator() {
-      let aggregatorBtns = document.getElementById('aggregators').children;
-      for (let i = 0; i < aggregatorBtns.length; i++) {
-        aggregatorBtns[i].classList.remove('active');
-      }
-      document.getElementById(this.selectedAggregator).classList.add('active');
     },
-    steamLink() {
-      let steamLinkError = document.getElementById('steam_link_error');
-      if (this.steamLink && /^(https:\/\/|http:\/\/)?steamcommunity.com\/(id|profiles)\/.*$/.test(this.steamLink)) {
-        steamLinkError.classList.add('hidden');
-      } else if (this.steamLink) {
-        steamLinkError.textContent = 'Ссылка не валидна';
-        steamLinkError.classList.remove('hidden');
-      } else {
-        steamLinkError.textContent = 'Ссылка не введена';
-        steamLinkError.classList.remove('hidden');
-      }
-    },
-    async promoCode() {
+    async checkPromoCode(promoCode, callback = () => {return;}) {
       let promoCodeError = document.getElementById('promocode_error');
       let promoCodeSuccess = document.getElementById('promocode_success');
       let donateBtn = document.getElementById('donate_btn');
       let promoCodeInput = document.getElementById('promocode');
       promoCodeInput.value = this.promoCode;
-      if (this.promoCode === '') {
+      if (promoCode === '') {
         promoCodeError.classList.add('hidden');
         promoCodeSuccess.classList.add('hidden');
         donateBtn.disabled = false;
@@ -216,7 +194,7 @@ export default {
       }
       for (let i = 0; i < this.promoCodeList.length; i++) {
         let currentPromo = this.promoCodeList[i];
-        if (currentPromo.key == this.promoCode) {
+        if (currentPromo.key == promoCode) {
           if (this.selected.price <= currentPromo.min_price || this.selected.price > currentPromo.max_price) {
             donateBtn.disabled = true;
             promoCodeError.classList.remove('hidden');
@@ -242,9 +220,9 @@ export default {
               promoCodeError.classList.add('hidden');
               promoCodeSuccess.classList.remove('hidden');
               donateBtn.disabled = false;
+              callback()
             }
           }
-
           break;
         } else {
           donateBtn.disabled = true;
@@ -253,6 +231,45 @@ export default {
           promoCodeSuccess.classList.add('hidden');
         }
       }
+    },
+    async checkSteamLink(steamLink, callback = () => {return;}) {
+      let donateBtn = document.getElementById('donate_btn');
+      let steamLinkError = document.getElementById('steam_link_error');
+      if (steamLink && /^(https:\/\/|http:\/\/)?steamcommunity.com\/(id|profiles)\/.*$/.test(steamLink)) {
+        steamLinkError.classList.add('hidden');
+        donateBtn.disabled = false;
+        callback();
+      } else if (steamLink) {
+        steamLinkError.textContent = 'Ссылка не валидна';
+        steamLinkError.classList.remove('hidden');
+        donateBtn.disabled = true;
+      } else {
+        steamLinkError.textContent = 'Ссылка не введена';
+        steamLinkError.classList.remove('hidden');
+        donateBtn.disabled = true;
+      }
+    }
+  },
+
+  watch: {
+    selectedAggregator() {
+      let aggregatorBtns = document.getElementById('aggregators').children;
+      for (let i = 0; i < aggregatorBtns.length; i++) {
+        aggregatorBtns[i].classList.remove('active');
+      }
+      document.getElementById(this.selectedAggregator).classList.add('active');
+    },
+    async steamLink() {
+      await this.checkSteamLink(this.steamLink, async () => {
+        let promo = document.getElementById('promocode').value;
+        await this.checkPromoCode(promo);
+      });
+    },
+    async promoCode() {
+      await this.checkPromoCode(this.promoCode, async () => {
+        let steamLink = document.getElementById('steam_link').value;
+        await this.checkSteamLink(steamLink);
+      });
     },
   }
 }
