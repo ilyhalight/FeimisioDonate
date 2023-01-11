@@ -7,7 +7,7 @@
         <p class="text-2xl">Информация о {{ privillegeInfo[0].link }}</p>
         <NuxtLink to="/" class="donate_link">← Вернуться назад</NuxtLink>
       </div>
-      <section class="flex flex-col md:flex-row flex-wrap mt-4 justify-center">
+      <section class="flex flex-col md:flex-row flex-wrap mt-4 justify-between">
           <div v-for="privillege in privillegeInfo" :key="privillege.uid" 
           class="flex m-4 p-4"
           :class="
@@ -38,7 +38,7 @@
         <div class="loading_default w-64"></div>
         <div class="loading_default w-48"></div>
       </div>
-      <section class="flex flex-col md:flex-row flex-wrap mt-4 justify-center animate-pulse">
+      <section class="flex flex-col md:flex-row flex-wrap mt-4 justify-between animate-pulse">
         <div v-for="i in [1,2,3]" :key="i" class="flex m-4 p-4 flex-row w-76 md:w-96">
           <div class="w-36 bg-neutral rounded"></div>
           <div class="flex-col mt-4 md:mt-0 m-4">
