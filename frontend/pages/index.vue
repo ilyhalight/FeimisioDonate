@@ -14,74 +14,73 @@
 </script>
 
 <template>
-  <main class="centered_container m-6 mt-2 md:mt-6">
-    <p class="page_title">Донат</p>
-    <section class="donate_section">
-        <template v-if="donateList.length">
-          <div v-for="donate in donateList" :key="donate.uid" class="donate_block">
-            <p class="donate_title">{{ donate.name }}</p>
-            <p class="donate_price" v-html="getFinalPrice(donate.duration, donate.price, donate.discount)"></p>
-            <div class="text-xl mt-4 mb-4">Вы получите доступ к:
-                <ul class="donate_features">
-                  <li v-for="feature in donate.short_description.split(';')" :key="feature">{{ feature }}</li>
-                </ul>   
-                <a class="donate_link" :bind="donate.link" :href="'/info/'+donate.link" target="_blank">Подробнее...</a>
-            </div>
-            <label :key="donate.uid" :id="'buy_'+donate.uid" class="donate_btn" @click="selected.uid = donate.uid; selected.name = donate.name; selected.price = donate.price; promoCode = ''; modalShow = true">Приобрести</label>
-          </div>
-        </template>
-        <template v-else>
-          <BlockLoading/>
-        </template>
-    </section>
-    <div>
-      <v-tailwind-modal v-model="modalShow" @cancel="cancelModal">
-        <form class="-mt-2" method="post" action="http://localhost:3312/api/payments-methods">
-          <p class="text-center text-xl font-bold">Покупка {{ selected.name }}</p>
-          <div class="mt-4">
-            <label class="block mb-2" for="steam_link">
-              Введите ссылку на <a class="donate_link" href="https://steamcommunity.com/">Steam</a> профиль:
-            </label>
-            <label class="text-error hidden" id="steam_link_error" for="steam_link">
-              Ссылка не введена
-            </label>
-            <input v-model="steamLink" class="text_input" id="steam_link" name="steam_link" type="url" placeholder="https://steamcommunity.com/id/EXAMPLE" autocomplete="on" required>
-            <input type="hidden" :value="selected.uid" name="uid">
-            <input type="hidden" :value="selectedAggregator" name="aggregator">
-            <label class="block mb-2 mt-4" for="promocode">
-              Введите промокод (если есть)
-            </label>
-            <label class="text-error hidden" id="promocode_error" for="promocode">
-              Промокод не найден
-            </label>
-            <label class="text-success hidden" id="promocode_success" for="promocode">
-              Промокод найден (Скидка: {{ promoCodeDiscount }}%)
-            </label>
-            <input v-model="promoCode" class="text_input" id="promocode" name="promocode" type="text" placeholder="Промокод" autocomplete="off">
-            <p class="block mt-4">Выберите платежную систему:</p>
-            <div class="flex flex-wrap justify-between" id="aggregators">
-              <div class="aggregator_btn active" id="freekassa" @click="selectedAggregator = 'freekassa'">
-                <img src="~/assets/images/aggregators/freekassa.png" alt="freekassa" width="100" height="32">
+    <main class="centered_container m-6 mt-2 md:mt-6">
+      <p class="page_title">Донат</p>
+      <section class="donate_section">
+          <template v-if="donateList.length">
+            <div v-for="donate in donateList" :key="donate.uid" class="donate_block">
+              <p class="donate_title">{{ donate.name }}</p>
+              <p class="donate_price" v-html="getFinalPrice(donate.duration, donate.price, donate.discount)"></p>
+              <div class="text-xl mt-4 mb-4">Вы получите доступ к:
+                  <ul class="donate_features">
+                    <li v-for="feature in donate.short_description.split(';')" :key="feature">{{ feature }}</li>
+                  </ul>   
+                  <NuxtLink class="donate_link" :bind="donate.link" :to="'/info/'+donate.link" target="_blank">Подробнее...</NuxtLink>
               </div>
-              <div class="aggregator_btn" id="enot" @click="selectedAggregator = 'enot'">
-                <img src="~/assets/images/aggregators/enot.png" alt="enot" width="100" height="32">
+              <label :key="donate.uid" :id="'buy_'+donate.uid" class="donate_btn" @click="selected.uid = donate.uid; selected.name = donate.name; selected.price = donate.price; promoCode = ''; modalShow = true">Приобрести</label>
+            </div>
+          </template>
+          <template v-else>
+            <BlockLoading/>
+          </template>
+      </section>
+      <div>
+        <v-tailwind-modal v-model="modalShow" @cancel="cancelModal">
+          <form class="-mt-2" method="post" action="http://localhost:3312/api/payments-methods">
+            <p class="text-center text-xl font-bold">Покупка {{ selected.name }}</p>
+            <div class="mt-4">
+              <label class="block mb-2" for="steam_link">
+                Введите ссылку на <a class="donate_link" href="https://steamcommunity.com/">Steam</a> профиль:
+              </label>
+              <label class="text-error hidden" id="steam_link_error" for="steam_link">
+                Ссылка не введена
+              </label>
+              <input v-model="steamLink" class="text_input" id="steam_link" name="steam_link" type="url" placeholder="https://steamcommunity.com/id/EXAMPLE" autocomplete="on" required>
+              <input type="hidden" :value="selected.uid" name="uid">
+              <input type="hidden" :value="selectedAggregator" name="aggregator">
+              <label class="block mb-2 mt-4" for="promocode">
+                Введите промокод (если есть)
+              </label>
+              <label class="text-error hidden" id="promocode_error" for="promocode">
+                Промокод не найден
+              </label>
+              <label class="text-success hidden" id="promocode_success" for="promocode">
+                Промокод найден (Скидка: {{ promoCodeDiscount }}%)
+              </label>
+              <input v-model="promoCode" class="text_input" id="promocode" name="promocode" type="text" placeholder="Промокод" autocomplete="off">
+              <p class="block mt-4">Выберите платежную систему:</p>
+              <div class="flex flex-wrap justify-between" id="aggregators">
+                <div class="aggregator_btn active" id="freekassa" @click="selectedAggregator = 'freekassa'">
+                  <img src="~/assets/images/aggregators/freekassa.png" alt="freekassa" width="100" height="32">
+                </div>
+                <div class="aggregator_btn" id="enot" @click="selectedAggregator = 'enot'">
+                  <img src="~/assets/images/aggregators/enot.png" alt="enot" width="100" height="32">
+                </div>
+                <div class="aggregator_btn" id="crystalpay" @click="selectedAggregator = 'crystalpay'">
+                  <img src="~/assets/images/aggregators/crystalpay.png" alt="crystalpay" width="100" height="32">
+                </div>
               </div>
-              <div class="aggregator_btn" id="crystalpay" @click="selectedAggregator = 'crystalpay'">
-                <img src="~/assets/images/aggregators/crystalpay.png" alt="crystalpay" width="100" height="32">
+              <div class="modal-action">
+                <input type="submit" id="donate_btn" class="donate_btn" @click="confirmModal" value="Приобрести">
               </div>
             </div>
-            <div class="modal-action">
-              <input type="submit" id="donate_btn" class="donate_btn" @click="confirmModal" value="Приобрести">
-            </div>
-          </div>
-        </form>
-      </v-tailwind-modal>
-    </div>
-  </main>
+          </form>
+        </v-tailwind-modal>
+      </div>
+    </main>
 </template>
 
 <script>
-import * as shajs from 'sha.js';
 export default {
   data() {
     return {
@@ -110,7 +109,7 @@ export default {
     }
 
     let timestamp = Math.floor(Date.now() / 1000)
-    const token = await shajs('sha256').update(`${this.$config.public.feimisioPromocodesKey}${this.$config.public.feimisioToken}${timestamp}`).digest('hex');
+    const token = await sha256(`${this.$config.public.feimisioPromocodesKey}${this.$config.public.feimisioToken}${timestamp}`);
     const promoCodeData = await $fetch(
       "http://localhost:3312/api/promocodes", {
         headers: {
@@ -124,6 +123,20 @@ export default {
   },
 
   methods: {
+    async sha256(message) {
+        // encode as UTF-8
+        const msgBuffer = new TextEncoder().encode(message);                    
+
+        // hash the message
+        const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+
+        // convert ArrayBuffer to Array
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+
+        // convert bytes to hex string                  
+        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        return hashHex;
+    },
     normalizePrice(price, discount) {
       if (price === 0) {
         return "Бесплатно";
@@ -216,7 +229,7 @@ export default {
             promoCodeSuccess.classList.add('hidden');
           } else {
             let timestamp = Math.floor(Date.now() / 1000)
-            const token = await shajs('sha256').update(`${this.$config.public.feimisioPromocodesKey}${this.$config.public.feimisioToken}${timestamp}`).digest('hex');
+            const token = await sha256(`${this.$config.public.feimisioPromocodesKey}${this.$config.public.feimisioToken}${timestamp}`);
             const promoCodeUsagesData = await $fetch(
               `http://localhost:3312/api/promocodes/uses?promo=${currentPromo.key}`, {
                 headers: {
