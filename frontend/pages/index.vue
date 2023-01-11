@@ -32,6 +32,14 @@
           </template>
           <template v-else>
             <BlockLoading/>
+            <BlockLoading/>
+            <BlockLoading/>
+            <BlockLoading/>
+            <BlockLoading/>
+            <BlockLoading/>
+            <BlockLoading/>
+            <BlockLoading/>
+            <BlockLoading/>
           </template>
       </section>
       <div>
