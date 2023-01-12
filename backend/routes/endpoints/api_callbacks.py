@@ -6,12 +6,14 @@ from fastapi import APIRouter, status, Form, Header
 from fastapi.responses import JSONResponse
 from aiogram.utils.markdown import escape_md
 
+
 from sql.promocode_uses.service import DbPromocodeUsesService
 from logger.masslog import MassLog
 from utils.db import find_privilleges_json, find_promocodes_json
 from utils.sign import sign_md5, sign_sha1
 from utils.give import giver_csgo
 from utils.converters import SteamConverters
+from utils.price import get_final_price
 
 router = APIRouter()
 log = logging.getLogger('server')
@@ -88,7 +90,13 @@ async def give_privillege_callback(aggregator: str, p_uid: int, p_steam_link: st
             steam_link = f'https://steamcommunity.com/{part}/{us_steamLink_arr[1]}'
         else:
             steam_link = p_steam_link
-        await MassLog().success(f'[Пользователь]({steam_link}) оплатил привилегию **{escape_md(privilleges["name"])}** \({p_uid}\) за **{escape_md(amount)}** руб\. \(комиссия: **{escape_md(commission)}**\) через {escape_md(aggregator)} \(Метод: **{escape_md(method)}** \| Промокод: **{escape_md(p_promo_code)}**\)')
+        
+        price_privillege = await get_final_price(privilleges['price'], privilleges['discount'], p_promo_code)
+        if price_privillege != amount:
+            await MassLog().error(f'[Пользователь]({steam_link}) оплатил привилегию **{escape_md(privilleges["name"])}** \(UID: **{p_uid}**\) за **{escape_md(amount)}** руб\. \(комиссия: **{escape_md(commission)}**\) через **{escape_md(aggregator)}** \(Метод: **{escape_md(method)}** \| Промокод: **{escape_md(p_promo_code)}**\)\n\n**ОШИБКА:** Не совпадает сумма платежа и цена привилегии!!!')
+            return JSONResponse(content = {'auth': 'OK', 'status': 'error', 'message': 'Не совпадает сумма платежа и цена привилегии!'}, status_code = status.HTTP_402_PAYMENT_REQUIRED)
+
+        await MassLog().success(f'[Пользователь]({steam_link}) оплатил привилегию **{escape_md(privilleges["name"])}** \(UID: **{p_uid}**\) за **{escape_md(amount)}** руб\. \(комиссия: **{escape_md(commission)}**\) через **{escape_md(aggregator)}** \(Метод: **{escape_md(method)}** \| Промокод: **{escape_md(p_promo_code)}**\)')
         res = await giver_csgo(p_uid, steam_link)
         steamid64 = SteamConverters().url_to_steam64(steam_link)
         steamid = SteamConverters().to_steamID(steamid64)
@@ -98,7 +106,7 @@ async def give_privillege_callback(aggregator: str, p_uid: int, p_steam_link: st
                 await DbPromocodeUsesService().add(p_promo_code, steamid, p_uid, time.time())
                 log.info(f'Added promocode {p_promo_code} usages to Database')
             except Exception:
-                await MassLog().success(f'Произошла ошибка при добавление использования промокода {escape_md(p_promo_code)} в Базу Данных\. \([Пользователь]({steam_link})**, привилегия: {escape_md(privilleges["name"])}** \({p_uid}\), цена: **{escape_md(amount)}** руб\. \(комиссия: **{escape_md(commission)}**) через {escape_md(aggregator)} \(Метод: **{escape_md(method)}**\)')
+                await MassLog().success(f'Произошла ошибка при добавление использования промокода {escape_md(p_promo_code)} в Базу Данных\. \([Пользователь]({steam_link})**, привилегия: {escape_md(privilleges["name"])}** \({p_uid}\), цена: **{escape_md(amount)}** руб\. \(комиссия: **{escape_md(commission)}**) через **{escape_md(aggregator)}** \(Метод: **{escape_md(method)}**\)')
                 log.exception('Error while adding usage to promo')
         if res:
             return JSONResponse(content = {'auth': 'OK', 'status': res['status'], 'message': res['web']}, status_code = status.HTTP_200_OK)
@@ -139,7 +147,6 @@ async def index(
     """
     log.info(f'Callback for freekassa payments: {locals()}')
     if str(MERCHANT_ID) == os.environ.get('FREEKASSA_SHOPID'):
-        log.debug('IP is valid')
         server_sign = sign_md5(MERCHANT_ID, AMOUNT, os.environ.get('FREEKASSA_SECRET'), MERCHANT_ORDER_ID)
         if server_sign != SIGN:
             return JSONResponse(content = {'error': 'Wrong SIGN'}, status_code = status.HTTP_403_FORBIDDEN)
@@ -179,9 +186,7 @@ async def index(ID: str, AMOUNT: int, PAYAMOUNT: float, PAYMETHOD: str, CURRENCY
             log.debug('wrong amount')
             return JSONResponse(content = {'error': 'Incorrect payment amount'}, status_code = status.HTTP_403_FORBIDDEN)
         p_steam_link = EXTRA.split(',')[2]
-        log.debug(EXTRA)
         p_promo_code = EXTRA.split(',')[3]
-        log.debug(p_promo_code)
         commission = PAYAMOUNT - AMOUNT
 
         crystalpay_shopid = os.environ.get('CRYSTALPAY_SHOPID')
@@ -199,5 +204,64 @@ async def index(ID: str, AMOUNT: int, PAYAMOUNT: float, PAYMETHOD: str, CURRENCY
                     return await give_privillege_callback('CrystalPay', p_uid, p_steam_link, AMOUNT, commission, PAYMETHOD, p_promo_code)
                 else:
                     return JSONResponse(content = {'error': 'Privilege has not yet been paid'}, status_code = status.HTTP_402_PAYMENT_REQUIRED)
+    log.debug('request is wrong')
+    return JSONResponse(content = {'error': 'Request is wrong'}, status_code = status.HTTP_403_FORBIDDEN)
+
+@router.post('/enot', summary = 'Callback for enot payments')
+async def index(
+    merchant: str = Form(), amount: str = Form(), credited: str = Form(),
+    intid: str = Form(), merchant_id: str = Form(), method: str = Form(), sign: str = Form(),
+    sign_2: str = Form(), currency: str = Form(), payer_details: str = Form(default=""),
+    commission: float = Form(), commission_pay: str = Form(), custom_field: str = Form()):
+    """Callback for enot payments
+
+    Args:
+        merchant (int): ID вашего магазина  
+        amount (float): Сумма заказа
+        credited (float): Сумма зачисленная вам на баланс (В рублях)
+        intid (int): ID операции в нашей системе
+        merchant_id (str): ID операции в вашей системе
+        sign (str): Ключ, который вы генерировали до оплаты заказа
+        sign_2 (str): Ключ, который сгенерирован, как SIGN, но с секретным ключом №2. Всегда проверяйте данный ключ!
+        currency (str): Валюта платежа (RUB, USD, EUR, UAH) (Зависит от валюты магазина. По умолчанию RUB)
+        payer_details (str): Реквизиты плательщика (Может быть пустым)
+        commission (float): Сумма комиссии при заказе (Зависит от валюты платежа. По умолчанию RUB)
+        commission_pay (str): Кто платит комиссию (shop - магазин, client - клиент, 50/50 - 50 на 50)
+        custom_field (list|dict|tuple): Строка или массив который вы передавали в параметр "cf"
+    """
+    if str(merchant) == os.environ.get('ENOT_SHOPID'):
+        log.debug(merchant)
+        log.debug(amount)
+        log.debug(credited)
+        log.debug(intid)
+        log.debug(merchant_id)
+        log.debug(method)
+        log.debug(sign)
+        log.debug(sign_2)
+        log.debug(currency)
+        log.debug(payer_details)
+        log.debug(commission)
+        log.debug(commission_pay)
+        log.debug(custom_field)
+        log.debug('SIGN is valid')
+        server_sign_2 = sign_md5(merchant, amount, os.environ.get('ENOT_SECRET2'), merchant_id)
+        log.debug(server_sign_2)
+        log.debug(sign_2)
+        if server_sign_2 != sign_2:
+            log.debug('wrong sign 2 ')
+            return JSONResponse(content = {'error': 'Wrong SIGN'}, status_code = status.HTTP_403_FORBIDDEN)
+        log.debug('SIGN 2 is valid')
+        p_uid = custom_field.split(',')[0]
+        p_amount = str(custom_field.split(',')[1])
+        log.debug(p_amount)
+        new_amount = amount.split('.')[0]
+        log.debug(new_amount)
+        if str(new_amount) != str(p_amount):
+            log.debug('wrong amount')
+            return JSONResponse(content = {'error': 'Incorrect payment amount'}, status_code = status.HTTP_403_FORBIDDEN)
+        p_steam_link = custom_field.split(',')[2]
+        p_promo_code = custom_field.split(',')[3]  
+        
+        return await give_privillege_callback('Enot.io', p_uid, p_steam_link, new_amount, commission, method, p_promo_code)
     log.debug('request is wrong')
     return JSONResponse(content = {'error': 'Request is wrong'}, status_code = status.HTTP_403_FORBIDDEN)
