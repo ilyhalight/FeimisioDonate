@@ -139,20 +139,20 @@ async def give_csgo_database(account_id: int, name: str, group: str, expires: in
         for g in groups:
             if g['name'] == group and g['gid'] > 0 and g['srv_group'] != '':
                 password = uuid.uuid4()
-                steamid = SteamConverters().to_steamID(g['steamid'])
-                await SBAdminsController().add(name, steamid, password, g['admin'], name, g['srv_group'], expires) 
+                steamid = SteamConverters().to_steamID(f'[U:1:{account_id}]')
+                await SBAdminsController().add(name, steamid, password, g['gid'], name, g['srv_group'], expires) 
                 return {
                     'status': 'success',
-                    'logs': f'Привилегия {group} была успешно выдана [игроку](https://steamcommunity.com/profiles/[U:1:{account_id}])\.\nПривилегия действует {str_expires}\.',
+                    'logs': f'Привилегия **{group}** была успешно выдана [игроку](https://steamcommunity.com/profiles/[U:1:{account_id}])\.\nПривилегия действует **{str_expires}**\.',
                     'web': f'Привилегия {group} была успешно выдана.\n\nВаша привилегия действует {str_expires}. Ваш пароль для входа в админку: **{password}** (не забудьте его сохранить). Если привилегия не появилась, вам необходимо перезайти на сервер.'
                 }
         return {
             'status': 'success',
-            'logs': f'Привилегия {group} была успешно выдана [игроку](https://steamcommunity.com/profiles/[U:1:{account_id}])\.\nПривилегия действует {str_expires}\.',
+            'logs': f'Привилегия **{group}** была успешно выдана [игроку](https://steamcommunity.com/profiles/[U:1:{account_id}])\.\nПривилегия действует **{str_expires}**\.',
             'web': f'Привилегия {group} была успешно выдана.\n\nВаша привилегия действует {str_expires}. Если привилегия не появилась, вам необходимо перезайти на сервер.'
         }
     return {
         'status': 'error',
-        'logs': f'Привилегия {group} не была выдана [игроку](https://steamcommunity.com/profiles/[U:1:{account_id}])\.\nВозникла проблема при добавление привилегии в базу данных\.',
+        'logs': f'Привилегия **{group}** не была выдана [игроку](https://steamcommunity.com/profiles/[U:1:{account_id}])\.\nВозникла проблема при добавление привилегии в базу данных\.',
         'web': 'Возникла проблема при добавление привилегии в базу данных. Отпишите по контактам внизу страницы.'
     }
