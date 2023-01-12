@@ -71,16 +71,14 @@
 
         if (windowData.steam) {
           this.steamLink = windowData.steam;
-          console.log(this.steamLink);
         }
 
         if (windowData.promocode) {
           this.promoCode = windowData.promocode;
-          console.log(this.promoCode);
         }
 
         if (this.uid > 0) {
-          const data = await $fetch(`http://localhost:3312/api/privillege?uid=${this.uid}`);
+          const data = await $fetch(`https://donate.fame-community.ru/api/privillege?uid=${this.uid}`);
           if (data) {
             if (data.discount > 0 && data.price > 0) {
               this.price = Math.round(data.price - (data.price / 100 * data.discount))

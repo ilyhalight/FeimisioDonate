@@ -5,7 +5,6 @@
   const enotSecret = config.public.enotSecret;
   const shopID = config.public.enotShopID;
 
-
   useHead({
     title: "Enot · Feimisio Donate",
     meta: [
@@ -26,14 +25,11 @@
         <form class="flex justify-center" id="enot_form" action="https://enot.io/pay" method="get">
           <input id='form-input-m' type='hidden' name='m' :value='shopID'>
           <input id='form-input-oa' type='hidden' name='oa' :value='this.price'>
-          <input id='form-input-o' type='hidden' name='o' :value='this.steamLink'>
+          <input id='form-input-o' type='hidden' name='o' :value='this.payID'>
           <input id='form-input-s' type='hidden' name='s' :value='sign(enotSecret, shopID)'>
           <input id='form-input-cr' type='hidden' name='cr' value='RUB'>
           <input id='form-input-c' type='hidden' name='c' value='Донат на сервера Feimisio'>
-          <input id='form-input-cf' type='hidden' name='cf[uid]' :value='this.uid'>
-          <input id='form-input-cf' type='hidden' name='cf[price]' :value='this.price'>
-          <input id='form-input-cf' type='hidden' name='cf[steamLink]' :value='this.steamLink'>
-          <input id='form-input-cf' type='hidden' name='cf[promoCode]' :value='this.promoCode'>
+          <input id='form-input-cf' type='hidden' name='cf' :value='this.uid+","+this.price+","+this.steamLink+","+this.promoCode'>
           <!-- <input id='form-input-success_url' type='hidden' name='success_url' value=''> -->
           <!-- <input id='form-input-fail_url' type='hidden' name='fail_url' value=''> -->
           <input class='donate_btn' id='form-input-submit' type="submit" value="Перейти"/>
@@ -72,16 +68,14 @@
 
         if (windowData.steam) {
           this.steamLink = windowData.steam;
-          console.log(this.steamLink);
         }
 
         if (windowData.promocode) {
           this.promoCode = windowData.promocode;
-          console.log(this.promoCode);
         }
 
         if (this.uid > 0) {
-          const data = await $fetch(`http://localhost:3312/api/privillege?uid=${this.uid}`);
+          const data = await $fetch(`https://donate.fame-community.ru/api/privillege?uid=${this.uid}`);
           if (data) {
             if (data.discount > 0 && data.price > 0) {
               this.price = Math.round(data.price - (data.price / 100 * data.discount))
