@@ -19,6 +19,9 @@
           <a href="https://fame-community.ru/custom/?id=user_agreement" class="footer_link">
             Пользовательское соглашение
           </a>
+          <NuxtLink to="/support" class="footer_link">
+            Поддержка
+          </NuxtLink>
           <a href="/api/redoc" class="footer_link">
             API
           </a>
