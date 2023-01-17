@@ -170,8 +170,12 @@
   @apply text-base text-accent hover:text-accent-focus;
 }
 
-.donate_btn {
+.feimisio_btn {
   @apply btn text-center w-32 border-2 hover:border-accent px-4 py-2 rounded-lg mt-auto transition-all duration-700;
+}
+
+.feimisio_full_btn {
+  @apply feimisio_btn w-full !important;
 }
 
 .aggregator_btn {
