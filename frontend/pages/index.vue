@@ -27,7 +27,7 @@
                   </ul>   
                   <NuxtLink class="donate_link" :bind="donate.link" :to="'/info/'+donate.link" target="_blank">Подробнее...</NuxtLink>
               </div>
-              <label :key="donate.uid" :id="'buy_'+donate.uid" class="donate_btn" @click="selected.uid = donate.uid; selected.name = donate.name; selected.price = donate.price; promoCode = ''; modalShow = true">Приобрести</label>
+              <label :key="donate.uid" :id="'buy_'+donate.uid" class="feimisio_btn" @click="selected.uid = donate.uid; selected.name = donate.name; selected.price = donate.price; promoCode = ''; modalShow = true">Приобрести</label>
             </div>
           </template>
           <template v-else>
@@ -79,7 +79,7 @@
                 </div>
               </div>
               <div class="modal-action">
-                <input type="submit" id="donate_btn" class="donate_btn" @click="confirmModal" value="Приобрести">
+                <input type="submit" id="feimisio_btn" class="feimisio_btn" @click="confirmModal" value="Приобрести">
               </div>
             </div>
           </form>
@@ -183,7 +183,7 @@ export default {
     async checkPromoCode(promoCode, callback = () => {return;}) {
       let promoCodeError = document.getElementById('promocode_error');
       let promoCodeSuccess = document.getElementById('promocode_success');
-      let donateBtn = document.getElementById('donate_btn');
+      let donateBtn = document.getElementById('feimisio_btn');
       let promoCodeInput = document.getElementById('promocode');
       promoCodeInput.value = this.promoCode;
       if (promoCode === '') {
@@ -233,7 +233,7 @@ export default {
       }
     },
     async checkSteamLink(steamLink, callback = () => {return;}) {
-      let donateBtn = document.getElementById('donate_btn');
+      let donateBtn = document.getElementById('feimisio_btn');
       let steamLinkError = document.getElementById('steam_link_error');
       if (steamLink && /^(https:\/\/|http:\/\/)?steamcommunity.com\/(id|profiles)\/.*$/.test(steamLink)) {
         steamLinkError.classList.add('hidden');
