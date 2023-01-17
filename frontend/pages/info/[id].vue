@@ -1,3 +1,17 @@
+<script setup>
+  import { useRoute } from 'vue-router'
+  const route = useRoute()
+  const id = route.params.id;
+  useHead({
+    title: `${id} · Feimisio Donate`,
+    meta: [
+      {
+        name: "og:title",
+        content: `${id} - Feimisio Donate`
+      },
+    ]
+  });
+</script>
 
 
 <template>
