@@ -32,7 +32,7 @@
           <input id='form-input-cf' type='hidden' name='cf' :value='this.uid+","+this.price+","+this.steamLink+","+this.promoCode'>
           <!-- <input id='form-input-success_url' type='hidden' name='success_url' value=''> -->
           <!-- <input id='form-input-fail_url' type='hidden' name='fail_url' value=''> -->
-          <input class='donate_btn' id='form-input-submit' type="submit" value="Перейти"/>
+          <input class='feimisio_btn' id='form-input-submit' type="submit" value="Перейти"/>
         </form>
       </div>
     </main>

@@ -35,7 +35,7 @@
           <input id='form-input-us' type='hidden' name='us_price' :value='this.price'>
           <input id='form-input-us' type='hidden' name='us_steamLink' :value='this.steamLink'>
           <input id='form-input-us' type='hidden' name='us_promoCode' :value='this.promoCode'>
-          <input class='donate_btn' id='form-input-submit' type="submit" value="Перейти"/>
+          <input class='feimisio_btn' id='form-input-submit' type="submit" value="Перейти"/>
         </form>
       </div>
     </main>
