@@ -1,19 +1,11 @@
 import logging
 import os
-import time
 import aiohttp
 from fastapi import APIRouter, status, Form, Header
 from fastapi.responses import JSONResponse
-from aiogram.utils.markdown import escape_md
 
-
-from sql.promocode_uses.service import DbPromocodeUsesService
-from logger.masslog import MassLog
-from utils.db import find_privilleges_json, find_promocodes_json
+from utils.give import give_privillege_callback
 from utils.sign import sign_md5, sign_sha1
-from utils.give import giver_csgo
-from utils.converters import SteamConverters
-from utils.price import get_final_price
 
 router = APIRouter()
 log = logging.getLogger('server')
@@ -63,57 +55,6 @@ currencies = {
     '41':	'VISA / MasterCard KZT',
     '42':	'СБП'
 }
-
-async def give_privillege_callback(aggregator: str, p_uid: int, p_steam_link: str, amount: int, commission: str, method: str, p_promo_code: str):
-    """Общая функция для выдачи привилегий
-
-    Args:
-        aggregator (str): платежный агрегатор
-        p_uid (int): uid привилегии
-        p_steam_link (str): необработанная часть стим ссылки (пример: idToilOfficial)
-        amount (int): сумма платежа
-        commission (str): комиссия
-        method (str): метод платежа
-        p_promo_code (str): промокод
-    """
-    privilleges = await find_privilleges_json(int(p_uid))
-    if privilleges:
-        if p_steam_link.startswith('id'):
-            us_steamLink_arr = p_steam_link.split('id', maxsplit = 1)
-            part = 'id/'
-        elif p_steam_link.startswith('profiles'):
-            us_steamLink_arr = p_steam_link.split('profiles', maxsplit = 1)
-            part = 'profiles/'
-        else:
-            part = ''
-        if part and len(us_steamLink_arr) > 1:
-            steam_link = f'https://steamcommunity.com/{part}/{us_steamLink_arr[1]}'
-        else:
-            steam_link = p_steam_link
-        
-        price_privillege = await get_final_price(privilleges['price'], privilleges['discount'], p_promo_code)
-        if price_privillege != amount:
-            await MassLog().error(f'[Пользователь]({steam_link}) оплатил привилегию **{escape_md(privilleges["name"])}** \(UID: **{p_uid}**\) за **{escape_md(amount)}** руб\. \(комиссия: **{escape_md(commission)}**\) через **{escape_md(aggregator)}** \(Метод: **{escape_md(method)}** \| Промокод: **{escape_md(p_promo_code)}**\)\n\n**ОШИБКА:** Не совпадает сумма платежа и цена привилегии!!!')
-            return JSONResponse(content = {'auth': 'OK', 'status': 'error', 'message': 'Не совпадает сумма платежа и цена привилегии!'}, status_code = status.HTTP_402_PAYMENT_REQUIRED)
-
-        await MassLog().success(f'[Пользователь]({steam_link}) оплатил привилегию **{escape_md(privilleges["name"])}** \(UID: **{p_uid}**\) за **{escape_md(amount)}** руб\. \(комиссия: **{escape_md(commission)}**\) через **{escape_md(aggregator)}** \(Метод: **{escape_md(method)}** \| Промокод: **{escape_md(p_promo_code)}**\)')
-        res = await giver_csgo(p_uid, steam_link)
-        steamid64 = SteamConverters().url_to_steam64(steam_link)
-        steamid = SteamConverters().to_steamID(steamid64)
-        promocode = await find_promocodes_json(p_promo_code)
-        if p_promo_code != '' and len(promocode) > 0:
-            try:
-                await DbPromocodeUsesService().add(p_promo_code, steamid, p_uid, time.time())
-                log.info(f'Added promocode {p_promo_code} usages to Database')
-            except Exception:
-                await MassLog().success(f'Произошла ошибка при добавление использования промокода {escape_md(p_promo_code)} в Базу Данных\. \([Пользователь]({steam_link})**, привилегия: {escape_md(privilleges["name"])}** \({p_uid}\), цена: **{escape_md(amount)}** руб\. \(комиссия: **{escape_md(commission)}**) через **{escape_md(aggregator)}** \(Метод: **{escape_md(method)}**\)')
-                log.exception('Error while adding usage to promo')
-        if res:
-            return JSONResponse(content = {'auth': 'OK', 'status': res['status'], 'message': res['web']}, status_code = status.HTTP_200_OK)
-        else:
-            return JSONResponse(content = {'auth': 'OK', 'status': 'error', 'message': 'Не удалось выдать привилегию'}, status_code = status.HTTP_200_OK)
-    log.debug('privilleges is wrong')
-    return JSONResponse(content = {'error': 'unknown privillege uid'}, status_code = status.HTTP_400_BAD_REQUEST)
 
 
 @router.post('/freekassa', response_class = JSONResponse, summary = 'Callback for freekassa payments', responses = payment_methods_responses)

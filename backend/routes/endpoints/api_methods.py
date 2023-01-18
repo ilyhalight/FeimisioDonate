@@ -8,6 +8,7 @@ from aiogram.utils.markdown import escape_md
 from logger.masslog import MassLog
 from utils.db import find_privilleges_json
 from utils.price import get_final_price
+from utils.give import give_privillege_callback
 
 router = APIRouter()
 log = logging.getLogger('server')
@@ -63,8 +64,9 @@ async def index(steam_link: str = Form(), uid: int = Form(), aggregator: str = F
                             return RedirectResponse(url = data['url'], status_code = status.HTTP_303_SEE_OTHER)
                         await MassLog().error(f'Ошибка при создании ссылки на оплату через **CrystalPay**: {escape_md(str(data))}')
                         return JSONResponse(content = {'error': 'Server error'}, status_code = status.HTTP_500_INTERNAL_SERVER_ERROR)
+        elif price == 0:
+            return await give_privillege_callback('Без оплаты', uid, steam_link, 0, 0, 'Бесплатно', promocode)
         else:
-            await MassLog().info(f'[Пользователь]({steam_link}) получил бесплатную привилегию {escape_md(privillege_name)} \(промокод: {escape_md(promocode)}\)')
-            return JSONResponse(content = {'error': 'WIP'}, status_code = status.HTTP_306_RESERVED)
+            return JSONResponse(content = {'error': 'Not valid price'}, status_code = status.HTTP_404_NOT_FOUND)
     else:
         return JSONResponse(content = {'error': 'Not valid aggregator'}, status_code = status.HTTP_404_NOT_FOUND)
