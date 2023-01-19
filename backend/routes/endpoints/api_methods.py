@@ -22,7 +22,7 @@ payment_methods_responses = {
 @router.post('/payments-methods', response_class = JSONResponse, summary = 'Redirect to another page', responses = payment_methods_responses)
 async def index(steam_link: str = Form(), uid: int = Form(), aggregator: str = Form(), promocode: str = Form(default = '')):
     log.debug('Redirect to another page')
-    if aggregator in ['freekassa', 'enot', 'crystalpay'] and uid > 0:
+    if aggregator in ['freekassa', 'enot', 'crystalpay', 'gift'] and uid > 0:
         privillege = await find_privilleges_json(uid)
         privillege_name = ''
         if privillege:
