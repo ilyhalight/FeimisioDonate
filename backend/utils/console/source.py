@@ -24,7 +24,7 @@ async def add_vip_ingame(ip: str, port: int, rcon_password: str, steamid: str, g
 
 if __name__ == '__main__':
     import asyncio
-    asyncio.run(add_vip_ingame('185.248.100.95', 27101, 'ffdfdgdf312gdfdfsdfsdasgH235DFG', 'STEAM_1:0:424055351', 'DEV', 0))
+    asyncio.run(add_vip_ingame('185.248.100.95', 27101, 'rcon_pass', 'STEAM_1:0:424055351', 'Premium', 0))
 
 # [SM] Не найден подходящий игрок
 # sm_addvip "#STEAM_1:1:636193233" "VIP" "60"
