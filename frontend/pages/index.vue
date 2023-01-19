@@ -68,13 +68,16 @@
               <input v-model="promoCode" class="text_input" id="promocode" name="promocode" type="text" placeholder="Промокод" autocomplete="off">
               <p class="block mt-4">Выберите платежную систему:</p>
               <div class="flex flex-wrap justify-between" id="aggregators">
-                <div class="aggregator_btn active" id="freekassa" @click="selectedAggregator = 'freekassa'">
+                <div v-if="selected.price == 0" class="aggregator_btn" :class="selected.price == 0 ? 'active' : ''" id="gift" @click="selectedAggregator = 'gift'">
+                  <img src="~/assets/images/aggregators/gift.png" alt="gift" width="100" height="32">
+                </div>
+                <div v-if="selected.price != 0" class="aggregator_btn active" id="freekassa" @click="selectedAggregator = 'freekassa'">
                   <img src="~/assets/images/aggregators/freekassa.png" alt="freekassa" width="100" height="32">
                 </div>
-                <div class="aggregator_btn" id="enot" @click="selectedAggregator = 'enot'">
+                <div v-if="selected.price != 0" class="aggregator_btn" id="enot" @click="selectedAggregator = 'enot'">
                   <img src="~/assets/images/aggregators/enot.png" alt="enot" width="100" height="32">
                 </div>
-                <div class="aggregator_btn" id="crystalpay" @click="selectedAggregator = 'crystalpay'">
+                <div v-if="selected.price != 0" class="aggregator_btn" id="crystalpay" @click="selectedAggregator = 'crystalpay'">
                   <img src="~/assets/images/aggregators/crystalpay.png" alt="crystalpay" width="100" height="32">
                 </div>
               </div>
@@ -109,7 +112,7 @@ export default {
   },
 
   created: async function() {
-
+    console.log('apiSecret 2', apiSecret);
     const privillegeData = await $fetch(
       "https://donate.fame-community.ru/api/privilleges"
     );
