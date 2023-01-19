@@ -27,7 +27,7 @@
                   </ul>   
                   <NuxtLink class="donate_link" :bind="donate.link" :to="'/info/'+donate.link" target="_blank">Подробнее...</NuxtLink>
               </div>
-              <label :key="donate.uid" :id="'buy_'+donate.uid" class="feimisio_btn" @click="selected.uid = donate.uid; selected.name = donate.name; selected.price = donate.price; promoCode = ''; modalShow = true">Приобрести</label>
+              <label :key="donate.uid" :id="'buy_'+donate.uid" class="feimisio_btn" @click="selected.uid = donate.uid; selected.name = donate.name; selected.price = donate.price; previousPrice = donate.price; promoCode = ''; modalShow = true">Приобрести</label>
             </div>
           </template>
           <template v-else>
@@ -103,6 +103,7 @@ export default {
       promoCode: '',
       promoCodeDiscount: 0,
       modalShow: false,
+      previousPrice: 0,
       selected: {
         uid: 1,
         name: 'VIP',
@@ -112,7 +113,6 @@ export default {
   },
 
   created: async function() {
-    console.log('apiSecret 2', apiSecret);
     const privillegeData = await $fetch(
       "https://donate.fame-community.ru/api/privilleges"
     );
@@ -193,6 +193,7 @@ export default {
         promoCodeError.classList.add('hidden');
         promoCodeSuccess.classList.add('hidden');
         donateBtn.disabled = false;
+        this.selected.price = this.previousPrice;
         return;
       }
       for (let i = 0; i < this.promoCodeList.length; i++) {
@@ -203,6 +204,7 @@ export default {
             promoCodeError.classList.remove('hidden');
             promoCodeError.innerText = 'Промокод не может быть применен к этой привилегии';
             promoCodeSuccess.classList.add('hidden');
+            this.selected.price = this.previousPrice;
           } else {
             let timestamp = Math.floor(Date.now() / 1000)
             const token = await shajs('sha256').update(`${this.$config.public.feimisioPromocodesKey}${this.$config.public.feimisioToken}${timestamp}`).digest('hex');
@@ -218,8 +220,17 @@ export default {
               promoCodeError.innerText = 'Превышено количество использований этого промокода';
               promoCodeError.classList.remove('hidden');
               promoCodeSuccess.classList.add('hidden');
+              this.selected.price = this.previousPrice;
             } else {
               this.promoCodeDiscount = currentPromo.discount;
+              if (currentPromo.discount === 100) {
+                if (this.selected.price !== 0) {
+                  this.previousPrice = this.selected.price;
+                }
+                this.selected.price = 0;
+              } else {
+                this.selected.price = this.previousPrice;
+              }
               promoCodeError.classList.add('hidden');
               promoCodeSuccess.classList.remove('hidden');
               donateBtn.disabled = false;
@@ -232,6 +243,7 @@ export default {
           promoCodeError.classList.remove('hidden');
           promoCodeError.innerText = 'Промокод не найден';
           promoCodeSuccess.classList.add('hidden');
+          this.selected.price = this.previousPrice;
         }
       }
     },
