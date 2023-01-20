@@ -1,6 +1,10 @@
 import logging
 
+from pymysql.err import IntegrityError
+from aiogram.utils.markdown import escape_md
+
 from sql.db import SBConnector
+from logger.masslog import MassLog
 
 log = logging.getLogger('server')
 
@@ -47,6 +51,9 @@ class SBAdminsService:
                 return True
         except AttributeError as err:
             log.error(f'Failed connection to database: {err}')
+            return None
+        except IntegrityError as err:
+            MassLog().error(f'Игрок с **{escape_md(authid)}** уже есть в базе данных MaterialAdmin')
             return None
         except Exception as err:
             log.exception(f'Failed to add a admin to the database ({self.database_sc}): {err}')
