@@ -56,7 +56,7 @@ export default defineNuxtConfig({
         },
     },
     env: {
-        baseUrl: `http://0.0.0.0:${process.env.PORT}` || 'http://localhost:3000',
+        baseUrl: `http://0.0.0.0:${process.env.PORT}` || 'http://127.0.0.1:3000',
     },
     debug: false,
 })
