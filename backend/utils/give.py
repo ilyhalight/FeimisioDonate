@@ -185,14 +185,17 @@ async def give_csgo_database(account_id: int, name: str, group: str, expires: in
             }
         elif current_group_level < group_level:
             await VipUsersController().remove(current['account_id'])
+            MassLog().info(f'Привилегия **{escape_md(сurrent_group)}** была удалена у [игрока](https://steamcommunity.com/profiles/[U:1:{account_id}]) для выдачи новой привилегии с более высоким приоритетом\.')
         elif current_group_level == group_level and current_expires != 0 and current_expires < expires:
             await VipUsersController().remove(current['account_id'])
+            MassLog().info(f'Привилегия **{escape_md(group)}** была удалена у [игрока](https://steamcommunity.com/profiles/[U:1:{account_id}]) для выдачи новой привилегии с более длинным сроком действия\.')
         elif current_group_level == group_level and current_expires != 0 and expires == 0:
             await VipUsersController().remove(current['account_id'])
+            MassLog().info(f'Привилегия **{escape_md(group)}** была удалена у [игрока](https://steamcommunity.com/profiles/[U:1:{account_id}]) для выдачи новой привилегии с бесконечным сроком действия\.')
         else:
             return {
                 'status': 'error',
-                'logs': f'Привилегия {escape_md(group)} не была выдана [игроку](https://steamcommunity.com/profiles/[U:1:{account_id}])\.\nУ игрока уже есть привилегия выше или равная этой\.',
+                'logs': f'Привилегия **{escape_md(group)}** не была выдана [игроку](https://steamcommunity.com/profiles/[U:1:{account_id}])\.\nУ игрока уже есть привилегия выше или равная этой\.',
                 'web': 'У вас уже есть привилегия выше или равная этой. Если вы всё равно хотите получить эту привилегию - отпишите по контактам внизу страницы.'
             }
     status = await VipUsersController().add(account_id, name, group, expires)
