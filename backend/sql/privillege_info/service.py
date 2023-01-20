@@ -80,10 +80,10 @@ class DbPrivillegeInfoService:
         try:
             async with db.cursor() as cursor:
                 if link and type(link) == str:
-                    await cursor.execute('SELECT * FROM `fd_privillege_info` WHERE `link` = %s', (link))
+                    await cursor.execute('SELECT * FROM `fd_privillege_info` WHERE `link` = %s ORDER BY is_big_img', (link))
                     result = await cursor.fetchall()
                 else:
-                    await cursor.execute('SELECT * FROM `fd_privillege_info`')
+                    await cursor.execute('SELECT * FROM `fd_privillege_info` ORDER BY is_big_img')
                     result = await cursor.fetchall()
                 return result
         except AttributeError as err:
