@@ -30,8 +30,8 @@
           <input id='form-input-cr' type='hidden' name='cr' value='RUB'>
           <input id='form-input-c' type='hidden' name='c' value='Донат на сервера Feimisio'>
           <input id='form-input-cf' type='hidden' name='cf' :value='this.uid+","+this.price+","+this.steamLink+","+this.promoCode'>
-          <!-- <input id='form-input-success_url' type='hidden' name='success_url' value=''> -->
-          <!-- <input id='form-input-fail_url' type='hidden' name='fail_url' value=''> -->
+          <input id='form-input-success_url' type='hidden' name='success_url' value='https://donate.fame-community.ru/results/success'>
+          <input id='form-input-fail_url' type='hidden' name='fail_url' value='https://donate.fame-community.ru/results/error'>
           <input class='donate_btn' id='form-input-submit' type="submit" value="Перейти"/>
         </form>
       </div>
