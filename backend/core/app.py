@@ -17,7 +17,7 @@ def custom_openapi():
         routes = app.routes,
     )
     openapi_schema["info"]["x-logo"] = {
-        "url": "/static/assets/logo.svg",
+        "url": "/api/static/assets/logo.svg",
         "altText": "Логотип Feimisio"
     }
     app.openapi_schema = openapi_schema
@@ -36,7 +36,7 @@ tags_meta = [
 
 
 app = FastAPI(openapi_url = '/api/openapi.json', docs_url = '/api/docs', redoc_url = '/api/redoc')
-app.mount('/static', StaticFiles(directory = 'static'), name = 'static')
+app.mount('/api/static', StaticFiles(directory = 'static'), name = 'static')
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
