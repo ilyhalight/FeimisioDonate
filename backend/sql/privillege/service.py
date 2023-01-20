@@ -22,7 +22,6 @@ class DbPrivillegeService:
                     `duration` INT NOT NULL,
                     `discount` INT NOT NULL,
                     `short_description` VARCHAR(512),
-                    `description` VARCHAR(3000),
                     `disabled` BOOLEAN DEFAULT FALSE
                 )""")
                 return True
@@ -35,7 +34,7 @@ class DbPrivillegeService:
         finally:
             db.close() if db else None
 
-    async def add_privillege(self, name: str, price: int, link: str, duration: int, discount: int, short_description: str, description: str, disabled: bool):
+    async def add_privillege(self, name: str, price: int, link: str, duration: int, discount: int, short_description: str, disabled: bool):
         """Добавляет привилегию в базу данных
 
         Args:
@@ -45,7 +44,6 @@ class DbPrivillegeService:
             duration: продолжительность привилегии (в часах)
             discount: скидка на привилегию
             short_description: короткое описание привилегии ("Вы получите")
-            description: описание блока страницы с описанием привилегии
             disabled: включена ли привилегия
 
         Returns:
@@ -55,7 +53,7 @@ class DbPrivillegeService:
         db = await DefaultConnector().connect()
         try:
             async with db.cursor() as cursor:
-                await cursor.execute('INSERT INTO `fd_privillege` (`name`, `price`, `link`, `duration`, `discount`, `short_description`, `description`, `disabled`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)', (name, price, link, duration, discount, short_description, description, disabled))
+                await cursor.execute('INSERT INTO `fd_privillege` (`name`, `price`, `link`, `duration`, `discount`, `short_description`, `disabled`) VALUES (%s, %s, %s, %s, %s, %s, %s)', (name, price, link, duration, discount, short_description, disabled))
                 await db.commit()
                 return True
         except AttributeError as err:

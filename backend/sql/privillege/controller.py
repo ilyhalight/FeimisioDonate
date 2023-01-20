@@ -6,9 +6,9 @@ class DbPrivillegeController:
         """Создаёт таблицу в базе данных, если она не существует"""
         return await DbPrivillegeService().init_table()
 
-    async def add_privillege(self, name: str, price: int, link: str, duration: int, discount: int, short_description: str, description: str, disabled: bool = False):
+    async def add_privillege(self, name: str, price: int, link: str, duration: int, discount: int, short_description: str, disabled: bool = False):
         """Добавляет привилегию в базу данных"""
-        return await DbPrivillegeService().add_privillege(name, price, link, duration, discount, short_description, description, disabled)
+        return await DbPrivillegeService().add_privillege(name, price, link, duration, discount, short_description, disabled)
 
     async def get_all(self):
         """Возвращает все привилегии из базы данных"""
