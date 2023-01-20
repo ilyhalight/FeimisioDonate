@@ -23,12 +23,12 @@
       <p class="page_description">При возникновении ошибок отпишите по контактам</p>
       <form class="flex justify-center" id="enot_form" action="https://enot.io/pay" method="get">
         <input id='form-input-m' type='hidden' name='m' :value='shopID'>
-        <input id='form-input-oa' type='hidden' name='oa' :value='this.price'>
-        <input id='form-input-o' type='hidden' name='o' :value='this.payID'>
+        <input id='form-input-oa' type='hidden' name='oa' :value='price'>
+        <input id='form-input-o' type='hidden' name='o' :value='payID'>
         <input id='form-input-s' type='hidden' name='s' :value='sign(enotSecret, shopID)'>
         <input id='form-input-cr' type='hidden' name='cr' value='RUB'>
         <input id='form-input-c' type='hidden' name='c' value='Донат на сервера Feimisio'>
-        <input id='form-input-cf' type='hidden' name='cf' :value='this.uid+","+this.price+","+this.steamLink+","+this.promoCode'>
+        <input id='form-input-cf' type='hidden' name='cf' :value='uid+","+price+","+steamLink+","+promoCode'>
         <input id='form-input-success_url' type='hidden' name='success_url' value='http://localhost:3999/results/success'>
         <input id='form-input-fail_url' type='hidden' name='fail_url' value='http://localhost:3999/results/error'>
         <input class='donate_btn' id='form-input-submit' type="submit" value="Перейти"/>
