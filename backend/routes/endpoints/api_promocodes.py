@@ -41,7 +41,7 @@ async def index(authorization: str = Header(default = '')):
     return JSONResponse(content = {'error': 'Invalid token'}, status_code = status.HTTP_401_UNAUTHORIZED)
 
 @router.get('/promocodes/uses', response_class = JSONResponse, summary = 'Get promocode uses', responses = get_promocodes_uses_responses)
-async def index(promo: str, authorization: str = Header(default = '')):
+async def index(promo: str = '', authorization: str = Header(default = '')):
     log.debug('find promocodes uses')
     if authorization != '' and len(authorization.split(',')) > 1:
         keys = authorization.split(',')
@@ -50,7 +50,10 @@ async def index(promo: str, authorization: str = Header(default = '')):
         token = keys[1]
         is_valid = await validate_token(token, key, timestamp)
         if is_valid:
-            data = await DbPromocodeUsesController().get_by_key(promo)
+            if promo == '':
+                data = await DbPromocodeUsesController().get_all()
+            else:
+                data = await DbPromocodeUsesController().get_by_key(promo)
             if data and len(data) > 0:
                 return JSONResponse(content = data, status_code = status.HTTP_200_OK)
             return JSONResponse(content = {'error': 'No data found'}, status_code = status.HTTP_204_NO_CONTENT)
