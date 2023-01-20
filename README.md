@@ -1,7 +1,5 @@
 # FeimisioDonate System
 
-Не забудьте настроить конфиги и .env файлы в папке с backend и frontend
-
 [![Python Version](https://img.shields.io/badge/Python-3.10-blue?style=for-the-badge)](https://www.python.org/) [![NodeJS Version](https://img.shields.io/badge/NodeJS-17-success?style=for-the-badge)](https://nodejs.org/en/) [![GitHub Stars](https://img.shields.io/github/stars/ilyhalight/FeimisioDonate?logo=FemisioStars&style=for-the-badge)](https://github.com/ilyhalight/FeimisioDonate/stargazers) [![GitHub Issues](https://img.shields.io/github/issues/ilyhalight/FeimisioDonate?style=for-the-badge)](https://github.com/ilyhalight/FeimisioDonate/issues) [![Current Version](https://img.shields.io/github/v/release/ilyhalight/FeimisioDonate?style=for-the-badge)](https://github.com/ilyhalight/FeimisioDonate) [![GitHub License](https://img.shields.io/github/license/ilyhalight/FeimisioDonate?style=for-the-badge)](https://github.com/ilyhalight/FeimisioDonate/blob/master/LICENSE)
 
 ⭐ Поставьте звездочку на GitHub — это очень мотивирует!
