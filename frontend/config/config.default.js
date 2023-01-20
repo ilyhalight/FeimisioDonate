@@ -1,5 +1,3 @@
-
-
 const config = () => {
     return {
         'feimisioToken': '',
