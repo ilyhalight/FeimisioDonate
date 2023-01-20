@@ -53,8 +53,6 @@ export default defineNuxtConfig({
             enotShopID: process.env.ENOT_SHOPID,
             freekassaSecret: process.env.FREEKASSA_SECRET,
             freekassaShopID: process.env.FREEKASSA_SHOPID,
-            feimisioToken: process.env.FEIMISIO_TOKEN,
-            feimisioPromocodesKey: process.env.FEIMISIO_PROMOCODES_KEY
         },
     },
     env: {
