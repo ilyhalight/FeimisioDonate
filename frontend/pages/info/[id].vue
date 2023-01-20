@@ -96,7 +96,7 @@
     created: async function() {
       const { id } = this.$route.params;
       const privillegeData = await $fetch(
-        `https://donate.fame-community.ru/api/privillege/info?name=${id}`
+        `http://localhost:3312/api/privillege/info?name=${id}`
       );
       if (privillegeData) {
         this.privillegeInfo = privillegeData;

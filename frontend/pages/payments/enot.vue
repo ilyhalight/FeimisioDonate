@@ -17,26 +17,24 @@
 </script>
 
 <template>
-  <ClientOnly>
-    <main class="centered_container m-6 mt-2 md:mt-6">
-      <div class="mx-10">
-        <p class="page_title">Форма оплаты Enot</p>
-        <p class="page_description">При возникновении ошибок отпишите по контактам</p>
-        <form class="flex justify-center" id="enot_form" action="https://enot.io/pay" method="get">
-          <input id='form-input-m' type='hidden' name='m' :value='shopID'>
-          <input id='form-input-oa' type='hidden' name='oa' :value='this.price'>
-          <input id='form-input-o' type='hidden' name='o' :value='this.payID'>
-          <input id='form-input-s' type='hidden' name='s' :value='sign(enotSecret, shopID)'>
-          <input id='form-input-cr' type='hidden' name='cr' value='RUB'>
-          <input id='form-input-c' type='hidden' name='c' value='Донат на сервера Feimisio'>
-          <input id='form-input-cf' type='hidden' name='cf' :value='this.uid+","+this.price+","+this.steamLink+","+this.promoCode'>
-          <input id='form-input-success_url' type='hidden' name='success_url' value='https://donate.fame-community.ru/results/success'>
-          <input id='form-input-fail_url' type='hidden' name='fail_url' value='https://donate.fame-community.ru/results/error'>
-          <input class='donate_btn' id='form-input-submit' type="submit" value="Перейти"/>
-        </form>
-      </div>
-    </main>
-  </ClientOnly>
+  <main class="centered_container m-6 mt-2 md:mt-6">
+    <div class="mx-10">
+      <p class="page_title">Форма оплаты Enot</p>
+      <p class="page_description">При возникновении ошибок отпишите по контактам</p>
+      <form class="flex justify-center" id="enot_form" action="https://enot.io/pay" method="get">
+        <input id='form-input-m' type='hidden' name='m' :value='shopID'>
+        <input id='form-input-oa' type='hidden' name='oa' :value='this.price'>
+        <input id='form-input-o' type='hidden' name='o' :value='this.payID'>
+        <input id='form-input-s' type='hidden' name='s' :value='sign(enotSecret, shopID)'>
+        <input id='form-input-cr' type='hidden' name='cr' value='RUB'>
+        <input id='form-input-c' type='hidden' name='c' value='Донат на сервера Feimisio'>
+        <input id='form-input-cf' type='hidden' name='cf' :value='this.uid+","+this.price+","+this.steamLink+","+this.promoCode'>
+        <input id='form-input-success_url' type='hidden' name='success_url' value='http://localhost:3999/results/success'>
+        <input id='form-input-fail_url' type='hidden' name='fail_url' value='http://localhost:3999/results/error'>
+        <input class='donate_btn' id='form-input-submit' type="submit" value="Перейти"/>
+      </form>
+    </div>
+  </main>
 </template>
 
 <script>
@@ -75,7 +73,7 @@
         }
 
         if (this.uid > 0) {
-          const data = await $fetch(`https://donate.fame-community.ru/api/privillege?uid=${this.uid}`);
+          const data = await $fetch(`http://localhost:3312/api/privillege?uid=${this.uid}`);
           if (data) {
             if (data.discount > 0 && data.price > 0) {
               this.price = Math.round(data.price - (data.price / 100 * data.discount))
