@@ -1,10 +1,6 @@
 <script setup>
   import { v4 as uuidv4 } from 'uuid';
   import MD5 from 'crypto-js/md5';
-  const config = useRuntimeConfig();
-  const freekassaSecret = config.public.freekassaSecret;
-  const shopID = config.public.freekassaShopID;
-
 
   useHead({
     title: "Freekassa · Feimisio Donate",
@@ -15,6 +11,10 @@
       },
     ]
   });
+
+  const config = useRuntimeConfig();
+  const freekassaSecret = config.public.freekassaSecret;
+  const shopID = config.public.freekassaShopID;
 </script>
 
 <template>
