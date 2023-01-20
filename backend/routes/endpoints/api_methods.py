@@ -55,8 +55,8 @@ async def index(steam_link: str = Form(), uid: int = Form(), aggregator: str = F
                     #     's': crystalpay_secret,
                     #     'amount': price,
                     #     'lifetime': 30,
-                    #     'redirect': 'https://donate.fame-community.ru/results/success',
-                    #     'callback': 'https://donate.fame-community.ru/api/callback/crystalpay',
+                    #     'redirect': 'http://localhost:3999/results/success',
+                    #     'callback': 'http://localhost:3312/api/callback/crystalpay',
                     #     'extra': f'{uid},{price},{steam_arr},{promocode}'
                     async with session.post('https://api.crystalpay.ru/v2/invoice/create/', json = {
                         'auth_login': crystalpay_shopid,
@@ -64,8 +64,8 @@ async def index(steam_link: str = Form(), uid: int = Form(), aggregator: str = F
                         'amount': price,
                         'type': 'purchase',
                         'description': 'Донат на сервера Feimisio',
-                        'redirect_url': 'https://donate.fame-community.ru/results/success',
-                        'callback_url': 'https://donate.fame-community.ru/api/callback/crystalpay',
+                        'redirect_url': 'http://localhost:3999/results/success',
+                        'callback_url': 'http://localhost:3312/api/callback/crystalpay',
                         'lifetime': 30,
                         'extra': f'{uid},{price},{steam_arr},{promocode}'
                     }) as resp:
