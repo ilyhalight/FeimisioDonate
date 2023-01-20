@@ -23,7 +23,7 @@ def init_worker():
         log.info('DB initialized')
 
     @app.on_event("startup")
-    @repeat_every(seconds = 60 * 10)  # 1 hour
+    @repeat_every(seconds = 60 * 10)  # 10 min
     async def worker():
         await save_privilleges_to_json()
         await save_privilleges_info_to_json()
