@@ -1,9 +1,9 @@
 import logging
 import os
-import aiohttp
 from fastapi import APIRouter, status, Form, Header
 from fastapi.responses import JSONResponse
 
+from models.crystalpay_request import CrystalPayRequest
 from utils.give import give_privillege_callback
 from utils.sign import sign_md5, sign_sha1
 
@@ -102,49 +102,81 @@ async def index(
         return await give_privillege_callback('FreeKassa', us_uid, us_steamLink, AMOUNT, commission, currency, us_promoCode)
     return JSONResponse(content = {'error': 'Request from not availabled IP or MERCHANT_ID is wrong'}, status_code = status.HTTP_403_FORBIDDEN)
 
-@router.get('/crystalpay', summary = 'Callback for crystalpay payments')
-async def index(ID: str, AMOUNT: int, PAYAMOUNT: float, PAYMETHOD: str, CURRENCY: str, HASH: str, EXTRA: str):
-    """Callback for crystalpay payments
 
-    Args:
-        ID (str): ID платежа
-        AMOUNT (int): Изначальная сумма платежа
-        PAYAMOUNT (float): Сумма, которую заплатил клиент
-        PAYMETHOD (str): Метод - btc, lztm, eth
-        CURRENCY (str): Валюта - BITCOIN, LZTMARKET, ETHEREUM
-        HASH (str): Хэш операции для проверки
-        EXTRA (str): Комментарий, указанный при оплате
-    """
-    if ID and CURRENCY and HASH:
-        server_sign = sign_sha1(ID, CURRENCY, os.environ.get('CRYSTALPAY_SECRET2'))
-        if server_sign != HASH:
-            log.debug('wrong hash')
-            return JSONResponse(content = {'error': 'Wrong HASH'}, status_code = status.HTTP_403_FORBIDDEN)
-        log.debug('SIGN is valid')
-        p_uid = EXTRA.split(',')[0]
-        p_amount = EXTRA.split(',')[1]
-        if str(AMOUNT) != str(p_amount):
+# CrystalPay v1 api
+# @router.get('/crystalpay', summary = 'Callback for crystalpay payments')
+# async def index(ID: str, AMOUNT: int, PAYAMOUNT: float, PAYMETHOD: str, CURRENCY: str, HASH: str, EXTRA: str):
+#     """Callback for crystalpay payments
+
+#     Args:
+#         ID (str): ID платежа
+#         AMOUNT (int): Изначальная сумма платежа
+#         PAYAMOUNT (float): Сумма, которую заплатил клиент
+#         PAYMETHOD (str): Метод - btc, lztm, eth
+#         CURRENCY (str): Валюта - BITCOIN, LZTMARKET, ETHEREUM
+#         HASH (str): Хэш операции для проверки
+#         EXTRA (str): Комментарий, указанный при оплате
+#     """
+#     if ID and CURRENCY and HASH:
+#         server_sign = sign_sha1(ID, CURRENCY, os.environ.get('CRYSTALPAY_SECRET2'))
+#         if server_sign != HASH:
+#             log.debug('wrong hash')
+#             return JSONResponse(content = {'error': 'Wrong HASH'}, status_code = status.HTTP_403_FORBIDDEN)
+#         log.debug('SIGN is valid')
+#         p_uid = EXTRA.split(',')[0]
+#         p_amount = EXTRA.split(',')[1]
+#         if str(AMOUNT) != str(p_amount):
+#             log.debug('wrong amount')
+#             return JSONResponse(content = {'error': 'Incorrect payment amount'}, status_code = status.HTTP_403_FORBIDDEN)
+#         p_steam_link = EXTRA.split(',')[2]
+#         p_promo_code = EXTRA.split(',')[3]
+#         commission = PAYAMOUNT - AMOUNT
+
+#         crystalpay_shopid = os.environ.get('CRYSTALPAY_SHOPID')
+#         crystalpay_secret = os.environ.get('CRYSTALPAY_SECRET')
+#         async with aiohttp.ClientSession() as session:
+#             async with session.get('https://api.crystalpay.ru/v1/', params = {
+#                 'o': 'invoice-check',
+#                 'n': crystalpay_shopid,
+#                 's': crystalpay_secret,
+#                 'i': ID
+#             }) as resp:
+#                 data = await resp.json()
+#                 log.debug(data)
+#                 if data['state'] == 'payed':
+#                     return await give_privillege_callback('CrystalPay', p_uid, p_steam_link, AMOUNT, commission, PAYMETHOD, p_promo_code)
+#                 else:
+#                     return JSONResponse(content = {'error': 'Privilege has not yet been paid'}, status_code = status.HTTP_402_PAYMENT_REQUIRED)
+#     log.debug('request is wrong')
+#     return JSONResponse(content = {'error': 'Request is wrong'}, status_code = status.HTTP_403_FORBIDDEN)
+
+@router.post('/crystalpay', summary = 'Callback for crystalpay payments')
+async def index(data: CrystalPayRequest):
+    """Callback for crystalpay payments"""
+
+    if data.id and data.currency and data.signature:
+        if data.state != 'payed':
+            log.debug('privillege not yes been paid')
+            return JSONResponse(content = {'error': 'Privilege has not yet been paid'}, status_code = status.HTTP_402_PAYMENT_REQUIRED)
+
+        if data.type != 'purchase':
+            log.debug('wrong payment type')
+            return JSONResponse(content = {'error': 'Wrong payment type'}, status_code = status.HTTP_402_PAYMENT_REQUIRED)
+        
+        server_sign = sign_sha1(data.id,  os.environ.get('CRYSTALPAY_SECRET2'))
+
+        if server_sign != data.signature:
+            log.debug('wrong sign')
+            return JSONResponse(content = {'error': 'Wrong sign'}, status_code = status.HTTP_403_FORBIDDEN)
+
+        p_uid = data.extra.split(',')[0]
+        p_amount = data.extra.split(',')[1]
+        if str(data.amount) != str(p_amount):
             log.debug('wrong amount')
             return JSONResponse(content = {'error': 'Incorrect payment amount'}, status_code = status.HTTP_403_FORBIDDEN)
-        p_steam_link = EXTRA.split(',')[2]
-        p_promo_code = EXTRA.split(',')[3]
-        commission = PAYAMOUNT - AMOUNT
-
-        crystalpay_shopid = os.environ.get('CRYSTALPAY_SHOPID')
-        crystalpay_secret = os.environ.get('CRYSTALPAY_SECRET')
-        async with aiohttp.ClientSession() as session:
-            async with session.get('https://api.crystalpay.ru/v1/', params = {
-                'o': 'invoice-check',
-                'n': crystalpay_shopid,
-                's': crystalpay_secret,
-                'i': ID
-            }) as resp:
-                data = await resp.json()
-                log.debug(data)
-                if data['state'] == 'payed':
-                    return await give_privillege_callback('CrystalPay', p_uid, p_steam_link, AMOUNT, commission, PAYMETHOD, p_promo_code)
-                else:
-                    return JSONResponse(content = {'error': 'Privilege has not yet been paid'}, status_code = status.HTTP_402_PAYMENT_REQUIRED)
+        p_steam_link = data.extra.split(',')[2]
+        p_promo_code = data.extra.split(',')[3]
+        return await give_privillege_callback('CrystalPay', p_uid, p_steam_link, data.amount, data.service_commission, data.method, p_promo_code)
     log.debug('request is wrong')
     return JSONResponse(content = {'error': 'Request is wrong'}, status_code = status.HTTP_403_FORBIDDEN)
 

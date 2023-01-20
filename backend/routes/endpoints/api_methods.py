@@ -49,18 +49,28 @@ async def index(steam_link: str = Form(), uid: int = Form(), aggregator: str = F
                 crystalpay_shopid = os.environ.get('CRYSTALPAY_SHOPID')
                 crystalpay_secret = os.environ.get('CRYSTALPAY_SECRET')
                 async with aiohttp.ClientSession() as session:
-                    async with session.get('https://api.crystalpay.ru/v1/', params = {
-                        'o': 'invoice-create',
-                        'n': crystalpay_shopid,
-                        's': crystalpay_secret,
+                    # async with session.get('https://api.crystalpay.ru/v1/', params = {
+                    #     'o': 'invoice-create',
+                    #     'n': crystalpay_shopid,
+                    #     's': crystalpay_secret,
+                    #     'amount': price,
+                    #     'lifetime': 30,
+                    #     'redirect': 'https://donate.fame-community.ru/results/success',
+                    #     'callback': 'https://donate.fame-community.ru/api/callback/crystalpay',
+                    #     'extra': f'{uid},{price},{steam_arr},{promocode}'
+                    async with session.post('https://api.crystalpay.ru/v2/invoice/create/', params = {
+                        'auth_login': crystalpay_shopid,
+                        'auth_secret': crystalpay_secret,
                         'amount': price,
+                        'type': 'purchase',
+                        'description': 'Донат на сервера Feimisio',
+                        'redirect_url': 'https://donate.fame-community.ru/results/success',
+                        'callback_url': 'https://donate.fame-community.ru/api/callback/crystalpay',
                         'lifetime': 30,
-                        'redirect': 'https://donate.fame-community.ru/results/success',
-                        'callback': 'https://donate.fame-community.ru/api/callback/crystalpay',
                         'extra': f'{uid},{price},{steam_arr},{promocode}'
                     }) as resp:
                         data = await resp.json()
-                        if data and data['auth'] == 'ok' and data['error'] == False and data['url'] != '':
+                        if data and data['error'] == False and data['url'] != '':
                             return RedirectResponse(url = data['url'], status_code = status.HTTP_303_SEE_OTHER)
                         await MassLog().error(f'Ошибка при создании ссылки на оплату через **CrystalPay**: {escape_md(str(data))}')
                         return JSONResponse(content = {'error': 'Server error'}, status_code = status.HTTP_500_INTERNAL_SERVER_ERROR)
