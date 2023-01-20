@@ -44,7 +44,7 @@ async def index(steam_link: str = Form(), uid: int = Form(), aggregator: str = F
             else:
                 steam_arr = f'{steam_link}'
             if aggregator != 'crystalpay':
-                return RedirectResponse(url = f'http://localhost:3999/payments/{aggregator}?steam={steam_arr}&price={price}&uid={uid}&promocode={promocode}', status_code = status.HTTP_303_SEE_OTHER)
+                return RedirectResponse(url = f'http://127.0.0.1:3999/payments/{aggregator}?steam={steam_arr}&price={price}&uid={uid}&promocode={promocode}', status_code = status.HTTP_303_SEE_OTHER)
             else:
                 crystalpay_shopid = os.environ.get('CRYSTALPAY_SHOPID')
                 crystalpay_secret = os.environ.get('CRYSTALPAY_SECRET')
@@ -55,8 +55,8 @@ async def index(steam_link: str = Form(), uid: int = Form(), aggregator: str = F
                     #     's': crystalpay_secret,
                     #     'amount': price,
                     #     'lifetime': 30,
-                    #     'redirect': 'http://localhost:3999/results/success',
-                    #     'callback': 'http://localhost:3312/api/callback/crystalpay',
+                    #     'redirect': 'http://127.0.0.1:3999/results/success',
+                    #     'callback': 'http://127.0.0.1:3312/api/callback/crystalpay',
                     #     'extra': f'{uid},{price},{steam_arr},{promocode}'
                     async with session.post('https://api.crystalpay.ru/v2/invoice/create/', json = {
                         'auth_login': crystalpay_shopid,
@@ -64,8 +64,8 @@ async def index(steam_link: str = Form(), uid: int = Form(), aggregator: str = F
                         'amount': price,
                         'type': 'purchase',
                         'description': 'Донат на сервера Feimisio',
-                        'redirect_url': 'http://localhost:3999/results/success',
-                        'callback_url': 'http://localhost:3312/api/callback/crystalpay',
+                        'redirect_url': 'http://127.0.0.1:3999/results/success',
+                        'callback_url': 'http://127.0.0.1:3312/api/callback/crystalpay',
                         'lifetime': 30,
                         'extra': f'{uid},{price},{steam_arr},{promocode}'
                     }) as resp:
