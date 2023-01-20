@@ -21,7 +21,7 @@
         <p class="text-2xl">Информация о {{ privillegeInfo[0].link }}</p>
         <NuxtLink to="/" class="donate_link">← Вернуться назад</NuxtLink>
       </div>
-      <section class="flex flex-col md:flex-row flex-wrap mt-4 justify-between">
+      <section class="flex flex-col md:flex-row flex-wrap mt-4 justify-center">
           <div v-for="privillege in privillegeInfo" :key="privillege.uid" 
           class="flex m-4 p-4"
           :class="
