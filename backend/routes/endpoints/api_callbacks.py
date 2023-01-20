@@ -163,7 +163,7 @@ async def index(data: CrystalPayRequest):
             log.debug('wrong payment type')
             return JSONResponse(content = {'error': 'Wrong payment type'}, status_code = status.HTTP_402_PAYMENT_REQUIRED)
         
-        server_sign = sign_sha1(data.id,  os.environ.get('CRYSTALPAY_SECRET2'))
+        server_sign = sign_sha1(data.id, os.environ.get('CRYSTALPAY_SECRET2'))
 
         if server_sign != data.signature:
             log.debug('wrong sign')

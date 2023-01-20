@@ -58,7 +58,7 @@ async def index(steam_link: str = Form(), uid: int = Form(), aggregator: str = F
                     #     'redirect': 'https://donate.fame-community.ru/results/success',
                     #     'callback': 'https://donate.fame-community.ru/api/callback/crystalpay',
                     #     'extra': f'{uid},{price},{steam_arr},{promocode}'
-                    async with session.post('https://api.crystalpay.ru/v2/invoice/create/', params = {
+                    async with session.post('https://api.crystalpay.ru/v2/invoice/create/', json = {
                         'auth_login': crystalpay_shopid,
                         'auth_secret': crystalpay_secret,
                         'amount': price,
@@ -69,7 +69,7 @@ async def index(steam_link: str = Form(), uid: int = Form(), aggregator: str = F
                         'lifetime': 30,
                         'extra': f'{uid},{price},{steam_arr},{promocode}'
                     }) as resp:
-                        data = await resp.json()
+                        data = await resp.json(content_type=None)
                         if data and data['error'] == False and data['url'] != '':
                             return RedirectResponse(url = data['url'], status_code = status.HTTP_303_SEE_OTHER)
                         await MassLog().error(f'Ошибка при создании ссылки на оплату через **CrystalPay**: {escape_md(str(data))}')
