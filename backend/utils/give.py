@@ -5,6 +5,7 @@ import logging
 from aiogram.utils.markdown import escape_md
 from fastapi import status
 from fastapi.responses import JSONResponse, RedirectResponse
+from datetime import datetime
 
 from config.load import load_json
 from logger.masslog import MassLog
@@ -131,8 +132,10 @@ async def give_on_csgo_server(steamid: int, name: str, group: str, seconds: int)
             if 'успешно добавлен!' in status:
                 if seconds == 0:
                     expires = 0
+                    date = 'навсегда'
                 else:
                     expires = int(time.time()) + seconds
+                    date = datetime.fromtimestamp(expires).strftime('%d.%m.%Y %H:%M')
                 account_id = SteamConverters().to_steamID3(steamid)
                 for g in groups:
                     if g['name'] == group and g['gid'] > 0 and g['srv_group'] != '':
@@ -140,13 +143,13 @@ async def give_on_csgo_server(steamid: int, name: str, group: str, seconds: int)
                         await SBAdminsController().add(name, steamid, password, g['admin'], name, g['srv_group'], expires) 
                         return {
                             'status': 'success',
-                            'logs': f'Привилегия {escape_md(group)} была успешно выдана [игроку](https://steamcommunity.com/profiles/{account_id})\.\nПривилегия действует до {expires}\.',
-                            'web': f'Привилегия {group} была успешно выдана.\n\nВаша привилегия действует до {expires}. Ваш пароль для входа в админку: **{password}** (не забудьте его сохранить). Если привилегия не появилась, вам необходимо перезайти на сервер.'
+                            'logs': f'Привилегия {escape_md(group)} была успешно выдана [игроку](https://steamcommunity.com/profiles/{account_id})\.\nПривилегия действует до **{escape_md(date)}**\.',
+                            'web': f'Привилегия {group} была успешно выдана.\n\nВаша привилегия действует до {escape_md(date)}. Ваш пароль для входа в админку: **{password}** (не забудьте его сохранить). Если привилегия не появилась, вам необходимо перезайти на сервер.'
                         }
                 return {
                     'status': 'success',
-                    'logs': f'Привилегия {escape_md(group)} была успешно выдана [игроку](https://steamcommunity.com/profiles/{account_id})\.\nПривилегия действует до {expires}\.\n\nПривилегия выдана на сервере {escape_md(server["ip"])}\:{server["port"]}',
-                    'web': f'Привилегия {group} была успешно выдана.\n\nВаша привилегия действует до {expires}.'
+                    'logs': f'Привилегия {escape_md(group)} была успешно выдана [игроку](https://steamcommunity.com/profiles/{account_id})\.\nПривилегия действует до **{escape_md(date)}**\.\n\nПривилегия выдана на сервере {escape_md(server["ip"])}\:{server["port"]}',
+                    'web': f'Привилегия {group} была успешно выдана.\n\nВаша привилегия действует до {escape_md(date)}.'
                 }
     return False
 
@@ -185,13 +188,13 @@ async def give_csgo_database(account_id: int, name: str, group: str, expires: in
             }
         elif current_group_level < group_level:
             await VipUsersController().remove(current['account_id'])
-            MassLog().info(f'Привилегия **{escape_md(сurrent_group)}** была удалена у [игрока](https://steamcommunity.com/profiles/[U:1:{account_id}]) для выдачи новой привилегии с более высоким приоритетом\.')
+            await MassLog().info(f'Привилегия **{escape_md(сurrent_group)}** была удалена у [игрока](https://steamcommunity.com/profiles/[U:1:{account_id}]) для выдачи новой привилегии с более высоким приоритетом\.')
         elif current_group_level == group_level and current_expires != 0 and current_expires < expires:
             await VipUsersController().remove(current['account_id'])
-            MassLog().info(f'Привилегия **{escape_md(group)}** была удалена у [игрока](https://steamcommunity.com/profiles/[U:1:{account_id}]) для выдачи новой привилегии с более длинным сроком действия\.')
+            await MassLog().info(f'Привилегия **{escape_md(group)}** была удалена у [игрока](https://steamcommunity.com/profiles/[U:1:{account_id}]) для выдачи новой привилегии с более длинным сроком действия\.')
         elif current_group_level == group_level and current_expires != 0 and expires == 0:
             await VipUsersController().remove(current['account_id'])
-            MassLog().info(f'Привилегия **{escape_md(group)}** была удалена у [игрока](https://steamcommunity.com/profiles/[U:1:{account_id}]) для выдачи новой привилегии с бесконечным сроком действия\.')
+            await MassLog().info(f'Привилегия **{escape_md(group)}** была удалена у [игрока](https://steamcommunity.com/profiles/[U:1:{account_id}]) для выдачи новой привилегии с бесконечным сроком действия\.')
         else:
             return {
                 'status': 'error',
@@ -202,7 +205,7 @@ async def give_csgo_database(account_id: int, name: str, group: str, expires: in
     if expires == 0:
         str_expires = 'навсегда'
     else:
-        str_expires = f'до {expires}'
+        str_expires = escape_md(f'до {datetime.fromtimestamp(expires).strftime("%d.%m.%Y %H:%M")}')
     if status:
         for g in groups:
             if g['name'] == group and g['gid'] > 0 and g['srv_group'] != '':
