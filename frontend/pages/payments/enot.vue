@@ -29,8 +29,8 @@
         <input id='form-input-cr' type='hidden' name='cr' value='RUB'>
         <input id='form-input-c' type='hidden' name='c' value='Донат на сервера Feimisio'>
         <input id='form-input-cf' type='hidden' name='cf' :value='uid+","+price+","+steamLink+","+promoCode'>
-        <input id='form-input-success_url' type='hidden' name='success_url' value='http://localhost:3999/results/success'>
-        <input id='form-input-fail_url' type='hidden' name='fail_url' value='http://localhost:3999/results/error'>
+        <input id='form-input-success_url' type='hidden' name='success_url' value='http://127.0.0.1:3999/results/success'>
+        <input id='form-input-fail_url' type='hidden' name='fail_url' value='http://127.0.0.1:3999/results/error'>
         <input class='donate_btn' id='form-input-submit' type="submit" value="Перейти"/>
       </form>
     </div>
@@ -73,7 +73,7 @@
         }
 
         if (this.uid > 0) {
-          const data = await $fetch(`http://localhost:3312/api/privillege?uid=${this.uid}`);
+          const data = await $fetch(`http://127.0.0.1:3312/api/privillege?uid=${this.uid}`);
           if (data) {
             if (data.discount > 0 && data.price > 0) {
               this.price = Math.round(data.price - (data.price / 100 * data.discount))

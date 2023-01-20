@@ -24,13 +24,13 @@
   }
 
   const donateList = await useAsyncData(async () => {
-    const response = await $fetch('http://localhost:3312/api/privilleges');
+    const response = await $fetch('http://127.0.0.1:3312/api/privilleges');
     return response;
   });
   const promoCodeList = await useAsyncData(async () => {
     const timestamp = getTimestamp();
     const token = await getToken(timestamp);
-    const response = await $fetch('http://localhost:3312/api/promocodes', {
+    const response = await $fetch('http://127.0.0.1:3312/api/promocodes', {
       headers: {
         'Authorization': `${timestamp},${token}`
       },
@@ -128,7 +128,7 @@
         } else {
           const timestamp = getTimestamp();
           const token = await getToken(timestamp);
-          const promoCodeUsagesData = await $fetch(`http://localhost:3312/api/promocodes/uses?promo=${currentPromo.key}`, {
+          const promoCodeUsagesData = await $fetch(`http://127.0.0.1:3312/api/promocodes/uses?promo=${currentPromo.key}`, {
             headers: {
               'Authorization': `${timestamp},${token}`
             },
@@ -243,7 +243,7 @@
       </section>
       <div>
         <v-tailwind-modal v-model="modalShow" @cancel="cancelModal">
-          <form class="-mt-2" method="post" action="http://localhost:3312/api/payments-methods">
+          <form class="-mt-2" method="post" action="http://127.0.0.1:3312/api/payments-methods">
             <p class="text-center text-xl font-bold">Покупка {{ selected.name }}</p>
             <div class="mt-4">
               <label class="block mb-2" for="steam_link">

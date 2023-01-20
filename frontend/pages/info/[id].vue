@@ -96,7 +96,7 @@
     created: async function() {
       const { id } = this.$route.params;
       const privillegeData = await $fetch(
-        `http://localhost:3312/api/privillege/info?name=${id}`
+        `http://127.0.0.1:3312/api/privillege/info?name=${id}`
       );
       if (privillegeData) {
         this.privillegeInfo = privillegeData;
