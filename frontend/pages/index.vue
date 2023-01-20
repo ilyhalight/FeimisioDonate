@@ -1,6 +1,8 @@
 <script setup>
   import BlockLoading from "~/components/donate/BlockLoading.vue";
   import VTailwindModal from "~/components/VTailwindModal.vue";
+  import shajs from 'sha.js';
+  import config from '~/config/config.js';
 
   useHead({
     title: "Главная · Feimisio Donate",
@@ -9,16 +11,213 @@
         name: "og:title",
         content: "Главная - Feimisio Donate"
       },
-    ]
+    ],
   });
+
+  function getTimestamp() {
+    return Math.floor(Date.now() / 1000)
+  }
+
+  async function getToken(timestamp) {
+    const token = await shajs('sha256').update(`${config.feimisioPromocodesKey}${config.feimisioToken}${timestamp}`).digest('hex');
+    return token
+  }
+
+  const donateList = await useAsyncData(async () => {
+    const response = await $fetch('https://donate.fame-community.ru/api/privilleges');
+    return response;
+  });
+  const promoCodeList = await useAsyncData(async () => {
+    const timestamp = getTimestamp();
+    const token = await getToken(timestamp);
+    const response = await $fetch('https://donate.fame-community.ru/api/promocodes', {
+      headers: {
+        'Authorization': `${timestamp},${token}`
+      },
+    });
+    return response;
+  })
+  const selectedAggregator = ref('freekassa');
+  const steamLink = ref('');
+  const promoCode = ref('');
+  const promoCodeDiscount = ref(0);
+  const modalShow = ref(false);
+  const previousPrice = ref(0);
+  const selected = ref({
+    uid: 1,
+    name: 'VIP',
+    price: 10000
+  });
+
+  function normalizePrice(price, discount) {
+    if (price === 0) {
+      return "Бесплатно";
+    } else {
+      if (discount === 0) {
+        return `${price}₽`;
+      } else {
+        return `${Math.round(price - (price / 100 * discount))}₽`
+      }
+    }
+  }
+
+  function normalizeDuration(duration) {
+    if (duration === 0) {
+      return 'навсегда';
+    } else if (duration % 24 === 0 && duration / 24 % 30 === 0) {
+      return `${duration / 24 / 30 === 1 ? '' : `${duration / 24 / 30} `}мес.`;
+    } else if (duration % 24 === 0) {
+      return `${duration / 24} дн`;
+    } else {
+      return `${duration} час.`;
+    }
+  }
+
+  function getFinalPrice(duration, price, discount) {
+    let priceNormalized = normalizePrice(price, discount);
+    let durationNormalized = normalizeDuration(duration);
+    let durationBlock = `<small class="donate_expire">/${durationNormalized}</small>`
+    if (discount > 0 && price > 0) {
+      return `<span class="line-through">${price}₽${durationBlock}</span><br> <span class="text-red-400">${priceNormalized}${durationBlock}</span>`;
+    } else {
+      return `${priceNormalized}${durationBlock}`;
+    }
+  }
+
+  function cancelModal(close) {
+    modalShow.value = false;
+  }
+
+  function confirmModal() {
+    let steamLink = document.getElementById('steam_link').value;
+    let steamLinkError = document.getElementById('steam_link_error');
+    if (steamLink && /^(https:\/\/|http:\/\/)?steamcommunity.com\/(id|profiles)\/.*$/.test(steamLink)) {
+      modalShow.value = false;
+    } else if (steamLink) {
+      steamLinkError.textContent = 'Ссылка не валидна';
+      steamLinkError.classList.remove('hidden');
+    } else {
+      steamLinkError.textContent = 'Ссылка не введена';
+      steamLinkError.classList.remove('hidden');
+    }
+  }
+
+  async function checkPromoCode(promoCode) {
+    let promoCodeError = document.getElementById('promocode_error');
+    let promoCodeSuccess = document.getElementById('promocode_success');
+    let donateBtn = document.getElementById('feimisio_btn');
+    // let promoCodeInput = document.getElementById('promocode');
+    // promoCodeInput.value = promoCode;
+    if (promoCode === '') {
+      promoCodeError.classList.add('hidden');
+      promoCodeSuccess.classList.add('hidden');
+      donateBtn.disabled = false;
+      selected.value.price = previousPrice.value;
+      return true;
+    }
+    for (let i = 0; i < promoCodeList.data.value.length; i++) {
+      let currentPromo = promoCodeList.data.value[i];
+      if (currentPromo.key == promoCode) {
+        if (selected.value.price <= currentPromo.min_price || selected.value.price > currentPromo.max_price) {
+          donateBtn.disabled = true;
+          promoCodeError.classList.remove('hidden');
+          promoCodeError.innerText = 'Промокод не может быть применен к этой привилегии';
+          promoCodeSuccess.classList.add('hidden');
+          selected.value.price = previousPrice.value;
+          return false;
+        } else {
+          const timestamp = getTimestamp();
+          const token = await getToken(timestamp);
+          const promoCodeUsagesData = await $fetch(`https://donate.fame-community.ru/api/promocodes/uses?promo=${currentPromo.key}`, {
+            headers: {
+              'Authorization': `${timestamp},${token}`
+            },
+          });
+          // const promoCodeUsagesData = promoCodeUsesList.data.value.filter(promo => promo.key === promoCode);
+          if (promoCodeUsagesData.length >= currentPromo.uses) {
+            donateBtn.disabled = true;
+            promoCodeError.innerText = 'Превышено количество использований этого промокода';
+            promoCodeError.classList.remove('hidden');
+            promoCodeSuccess.classList.add('hidden');
+            selected.value.price = previousPrice.value;
+            return false;
+          } else {
+            promoCodeDiscount.value = currentPromo.discount;
+            if (currentPromo.discount === 100) {
+              if (selected.value.price !== 0) {
+                previousPrice.value = selected.value.price;
+              }
+              selected.value.price = 0;
+            } else {
+              selected.value.price = previousPrice.value;
+            }
+            promoCodeError.classList.add('hidden');
+            promoCodeSuccess.classList.remove('hidden');
+            donateBtn.disabled = false;
+            return true;
+          }
+        }
+      } else {
+        donateBtn.disabled = true;
+        promoCodeError.classList.remove('hidden');
+        promoCodeError.innerText = 'Промокод не найден';
+        promoCodeSuccess.classList.add('hidden');
+        selected.value.price = previousPrice.value;
+      }
+    }
+    return false;
+  }
+
+  async function checkSteamLink(steamLink) {
+    let donateBtn = document.getElementById('feimisio_btn');
+    let steamLinkError = document.getElementById('steam_link_error');
+    if (steamLink && /^(https:\/\/|http:\/\/)?steamcommunity.com\/(id|profiles)\/.*$/.test(steamLink)) {
+      steamLinkError.classList.add('hidden');
+      donateBtn.disabled = false;
+      return true;
+    } else if (steamLink) {
+      steamLinkError.textContent = 'Ссылка не валидна';
+      steamLinkError.classList.remove('hidden');
+      donateBtn.disabled = true;
+    } else {
+      steamLinkError.textContent = 'Ссылка не введена';
+      steamLinkError.classList.remove('hidden');
+      donateBtn.disabled = true;
+    }
+    return false;
+  }
+
+  async function checkSteamAndPromo() {
+    let steamLink = document.getElementById('steam_link').value;
+    let promo = document.getElementById('promocode').value;
+    const steamResult = await checkSteamLink(steamLink);
+    const promoCodeResult = await checkPromoCode(promo);
+    if (steamResult && promoCodeResult) {
+      document.getElementById('feimisio_btn').disabled = false;
+    } else {
+      document.getElementById('feimisio_btn').disabled = true;
+    }
+  }
+
+  watch(selectedAggregator, () => {
+    let aggregatorBtns = document.getElementById('aggregators').children;
+    for (let i = 0; i < aggregatorBtns.length; i++) {
+      aggregatorBtns[i].classList.remove('active');
+    }
+    document.getElementById(selectedAggregator.value).classList.add('active');
+  });
+
+  watch(steamLink, checkSteamAndPromo);
+
+  watch(promoCode, checkSteamAndPromo);
 </script>
 
 <template>
     <main class="centered_container m-6 mt-2 md:mt-6">
       <p class="page_title">Донат</p>
       <section class="donate_section">
-          <template v-if="donateList.length">
-            <div v-for="donate in donateList" :key="donate.uid" class="donate_block">
+          <template v-if="donateList.data.value.length">
+            <div v-for="donate in donateList.data.value" :key="donate.uid" class="donate_block">
               <p class="donate_title">{{ donate.name }}</p>
               <p class="donate_price" v-html="getFinalPrice(donate.duration, donate.price, donate.discount)"></p>
               <div class="text-xl mt-4 mb-4">Вы получите доступ к:
@@ -90,202 +289,3 @@
       </div>
     </main>
 </template>
-
-<script>
-import shajs from 'sha.js';
-export default {
-  data() {
-    return {
-      donateList: [],
-      promoCodeList: [],
-      selectedAggregator: 'freekassa',
-      steamLink: '',
-      promoCode: '',
-      promoCodeDiscount: 0,
-      modalShow: false,
-      previousPrice: 0,
-      selected: {
-        uid: 1,
-        name: 'VIP',
-        price: 100000
-      }
-    }
-  },
-
-  created: async function() {
-    const privillegeData = await $fetch(
-      "https://donate.fame-community.ru/api/privilleges"
-    );
-    if (privillegeData) {
-      this.donateList = privillegeData;
-    }
-
-    let timestamp = Math.floor(Date.now() / 1000)
-    const token = await shajs('sha256').update(`${this.$config.public.feimisioPromocodesKey}${this.$config.public.feimisioToken}${timestamp}`).digest('hex');
-    const promoCodeData = await $fetch(
-      "https://donate.fame-community.ru/api/promocodes", {
-        headers: {
-          "Authorization": `${timestamp},${token}`
-        }
-      }
-    );
-    if (promoCodeData) {
-      this.promoCodeList = promoCodeData;
-    }
-  },
-
-  methods: {
-    normalizePrice(price, discount) {
-      if (price === 0) {
-        return "Бесплатно";
-      } else {
-        if (discount === 0) {
-          return `${price}₽`;
-        } else {
-          return `${Math.round(price - (price / 100 * discount))}₽`
-        }
-      }
-    },
-    normalizeDuration(duration) {
-      if (duration === 0) {
-        return 'навсегда';
-      } else if (duration % 24 === 0 && duration / 24 % 30 === 0) {
-        return `${duration / 24 / 30 === 1 ? '' : `${duration / 24 / 30} `}мес.`;
-      } else if (duration % 24 === 0) {
-        return `${duration / 24} дн`;
-      } else {
-        return `${duration} час.`;
-      }
-    },
-    getFinalPrice(duration, price, discount) {
-      let priceNormalized = this.normalizePrice(price, discount);
-      let durationNormalized = this.normalizeDuration(duration);
-      let durationBlock = `<small class="donate_expire">/${durationNormalized}</small>`
-      if (discount > 0 && price > 0) {
-        return `<span class="line-through">${price}₽${durationBlock}</span><br> <span class="text-red-400">${priceNormalized}${durationBlock}</span>`;
-      } else {
-        return `${priceNormalized}${durationBlock}`;
-      }
-    },
-    confirmModal() {
-      let steamLink = document.getElementById('steam_link').value;
-      let steamLinkError = document.getElementById('steam_link_error');
-      if (steamLink && /^(https:\/\/|http:\/\/)?steamcommunity.com\/(id|profiles)\/.*$/.test(steamLink)) {
-        this.modalShow = false;
-      } else if (steamLink) {
-        steamLinkError.textContent = 'Ссылка не валидна';
-        steamLinkError.classList.remove('hidden');
-      } else {
-        steamLinkError.textContent = 'Ссылка не введена';
-        steamLinkError.classList.remove('hidden');
-      }
-    },
-    cancelModal(close) {
-      this.modalShow = false;
-    },
-    async checkPromoCode(promoCode, callback = () => {return;}) {
-      let promoCodeError = document.getElementById('promocode_error');
-      let promoCodeSuccess = document.getElementById('promocode_success');
-      let donateBtn = document.getElementById('feimisio_btn');
-      let promoCodeInput = document.getElementById('promocode');
-      promoCodeInput.value = this.promoCode;
-      if (promoCode === '') {
-        promoCodeError.classList.add('hidden');
-        promoCodeSuccess.classList.add('hidden');
-        donateBtn.disabled = false;
-        this.selected.price = this.previousPrice;
-        return;
-      }
-      for (let i = 0; i < this.promoCodeList.length; i++) {
-        let currentPromo = this.promoCodeList[i];
-        if (currentPromo.key == promoCode) {
-          if (this.selected.price <= currentPromo.min_price || this.selected.price > currentPromo.max_price) {
-            donateBtn.disabled = true;
-            promoCodeError.classList.remove('hidden');
-            promoCodeError.innerText = 'Промокод не может быть применен к этой привилегии';
-            promoCodeSuccess.classList.add('hidden');
-            this.selected.price = this.previousPrice;
-          } else {
-            let timestamp = Math.floor(Date.now() / 1000)
-            const token = await shajs('sha256').update(`${this.$config.public.feimisioPromocodesKey}${this.$config.public.feimisioToken}${timestamp}`).digest('hex');
-            const promoCodeUsagesData = await $fetch(
-              `https://donate.fame-community.ru/api/promocodes/uses?promo=${currentPromo.key}`, {
-                headers: {
-                  "Authorization": `${timestamp},${token}`
-                }
-              }
-            );
-            if (promoCodeUsagesData.length >= currentPromo.uses) {
-              donateBtn.disabled = true;
-              promoCodeError.innerText = 'Превышено количество использований этого промокода';
-              promoCodeError.classList.remove('hidden');
-              promoCodeSuccess.classList.add('hidden');
-              this.selected.price = this.previousPrice;
-            } else {
-              this.promoCodeDiscount = currentPromo.discount;
-              if (currentPromo.discount === 100) {
-                if (this.selected.price !== 0) {
-                  this.previousPrice = this.selected.price;
-                }
-                this.selected.price = 0;
-              } else {
-                this.selected.price = this.previousPrice;
-              }
-              promoCodeError.classList.add('hidden');
-              promoCodeSuccess.classList.remove('hidden');
-              donateBtn.disabled = false;
-              callback()
-            }
-          }
-          break;
-        } else {
-          donateBtn.disabled = true;
-          promoCodeError.classList.remove('hidden');
-          promoCodeError.innerText = 'Промокод не найден';
-          promoCodeSuccess.classList.add('hidden');
-          this.selected.price = this.previousPrice;
-        }
-      }
-    },
-    async checkSteamLink(steamLink, callback = () => {return;}) {
-      let donateBtn = document.getElementById('feimisio_btn');
-      let steamLinkError = document.getElementById('steam_link_error');
-      if (steamLink && /^(https:\/\/|http:\/\/)?steamcommunity.com\/(id|profiles)\/.*$/.test(steamLink)) {
-        steamLinkError.classList.add('hidden');
-        donateBtn.disabled = false;
-        callback();
-      } else if (steamLink) {
-        steamLinkError.textContent = 'Ссылка не валидна';
-        steamLinkError.classList.remove('hidden');
-        donateBtn.disabled = true;
-      } else {
-        steamLinkError.textContent = 'Ссылка не введена';
-        steamLinkError.classList.remove('hidden');
-        donateBtn.disabled = true;
-      }
-    }
-  },
-
-  watch: {
-    selectedAggregator() {
-      let aggregatorBtns = document.getElementById('aggregators').children;
-      for (let i = 0; i < aggregatorBtns.length; i++) {
-        aggregatorBtns[i].classList.remove('active');
-      }
-      document.getElementById(this.selectedAggregator).classList.add('active');
-    },
-    async steamLink() {
-      await this.checkSteamLink(this.steamLink, async () => {
-        let promo = document.getElementById('promocode').value;
-        await this.checkPromoCode(promo);
-      });
-    },
-    async promoCode() {
-      await this.checkPromoCode(this.promoCode, async () => {
-        let steamLink = document.getElementById('steam_link').value;
-        await this.checkSteamLink(steamLink);
-      });
-    },
-  }
-}
-</script>
