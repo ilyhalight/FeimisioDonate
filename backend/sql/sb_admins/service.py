@@ -53,7 +53,7 @@ class SBAdminsService:
             log.error(f'Failed connection to database: {err}')
             return None
         except IntegrityError as err:
-            MassLog().error(f'Игрок с **{escape_md(authid)}** уже есть в базе данных MaterialAdmin')
+            await MassLog().error(f'Игрок с **{escape_md(authid)}** уже есть в базе данных MaterialAdmin')
             return None
         except Exception as err:
             log.exception(f'Failed to add a admin to the database ({self.database_sc}): {err}')
