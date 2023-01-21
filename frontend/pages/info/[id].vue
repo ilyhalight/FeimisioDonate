@@ -21,7 +21,7 @@
         <p class="text-2xl">Информация о {{ privillegeInfo[0].link }}</p>
         <NuxtLink to="/" class="donate_link">← Вернуться назад</NuxtLink>
       </div>
-      <section class="flex flex-col md:flex-row flex-wrap mt-4 justify-center">
+      <section class="flex flex-col md:flex-row flex-wrap mt-4">
           <div v-for="privillege in privillegeInfo" :key="privillege.uid" 
           class="flex m-4 p-4"
           :class="
@@ -32,7 +32,7 @@
                   privillege.img_reverse_side ?
                     'flex-row-reverse' : 'flex-row'
                 : 'flex-col')+
-            (privillege.is_big_img ? ' w-66 md:w-[100%]' : ' w-76 md:w-96')">
+            (privillege.is_big_img ? ' w-66 md:w-[100%]' : ' w-76 md:w-[30rem]')">
               <img v-if="privillege.img_link" class="rounded-lg" :class="privillege.is_big_img ? 'max-w-sm w-[95%] md:max-w-md md:w-full h-full' : 'w-36 h-36'" :src="privillege.img_link" :alt="privillege.name+' пример'">
               <template v-if="privillege.img_link">
                 <div class="flex-col mt-4 md:mt-0" :class="privillege.is_big_img ? 'w-full md:m-4' : 'm-4'">
