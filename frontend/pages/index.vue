@@ -27,22 +27,10 @@
     const response = await $fetch('http://127.0.0.1:3312/api/privilleges');
     return response;
   });
-  const promoCodeList = await useAsyncData(async () => {
-    const timestamp = getTimestamp();
-    const token = await getToken(timestamp);
-    const response = await $fetch('http://127.0.0.1:3312/api/promocodes', {
-      headers: {
-        'Authorization': `${timestamp},${token}`
-      },
-    });
-    return response;
-  })
   const selectedAggregator = ref('freekassa');
   const steamLink = ref('');
   const promoCode = ref('');
-  const promoCodeDiscount = ref(0);
   const modalShow = ref(false);
-  const previousPrice = ref(0);
   const selected = ref({
     uid: 1,
     name: 'VIP',
@@ -106,65 +94,33 @@
     let promoCodeError = document.getElementById('promocode_error');
     let promoCodeSuccess = document.getElementById('promocode_success');
     let donateBtn = document.getElementById('feimisio_btn');
-    // let promoCodeInput = document.getElementById('promocode');
-    // promoCodeInput.value = promoCode;
-    if (promoCode === '') {
+
+    const timestamp = getTimestamp();
+    const token = await getToken(timestamp);
+    const promoCodeData = await $fetch(`http://127.0.0.1:3312/api/promocodes/check?privillege=&promo=${promoCode}`, {
+      method: 'POST',
+      parseResponse: JSON.parse,
+      headers: {
+        'Authorization': `${timestamp},${token}`
+      },
+      query: {
+        privillege: selected.value.uid,
+        promo: promoCode
+      }
+    });
+
+    if (promoCodeData.data.status === true) {
+      promoCodeSuccess.classList.remove('hidden');
+      promoCodeSuccess.innerText = promoCodeData.data.msg;
       promoCodeError.classList.add('hidden');
-      promoCodeSuccess.classList.add('hidden');
       donateBtn.disabled = false;
-      selected.value.price = previousPrice.value;
       return true;
     }
-    for (let i = 0; i < promoCodeList.data.value.length; i++) {
-      let currentPromo = promoCodeList.data.value[i];
-      if (currentPromo.key == promoCode) {
-        if (selected.value.price <= currentPromo.min_price || selected.value.price > currentPromo.max_price) {
-          donateBtn.disabled = true;
-          promoCodeError.classList.remove('hidden');
-          promoCodeError.innerText = 'Промокод не может быть применен к этой привилегии';
-          promoCodeSuccess.classList.add('hidden');
-          selected.value.price = previousPrice.value;
-          return false;
-        } else {
-          const timestamp = getTimestamp();
-          const token = await getToken(timestamp);
-          const promoCodeUsagesData = await $fetch(`http://127.0.0.1:3312/api/promocodes/uses?promo=${currentPromo.key}`, {
-            headers: {
-              'Authorization': `${timestamp},${token}`
-            },
-          });
-          // const promoCodeUsagesData = promoCodeUsesList.data.value.filter(promo => promo.key === promoCode);
-          if (promoCodeUsagesData.length >= currentPromo.uses) {
-            donateBtn.disabled = true;
-            promoCodeError.innerText = 'Превышено количество использований этого промокода';
-            promoCodeError.classList.remove('hidden');
-            promoCodeSuccess.classList.add('hidden');
-            selected.value.price = previousPrice.value;
-            return false;
-          } else {
-            promoCodeDiscount.value = currentPromo.discount;
-            if (currentPromo.discount === 100) {
-              if (selected.value.price !== 0) {
-                previousPrice.value = selected.value.price;
-              }
-              selected.value.price = 0;
-            } else {
-              selected.value.price = previousPrice.value;
-            }
-            promoCodeError.classList.add('hidden');
-            promoCodeSuccess.classList.remove('hidden');
-            donateBtn.disabled = false;
-            return true;
-          }
-        }
-      } else {
-        donateBtn.disabled = true;
-        promoCodeError.classList.remove('hidden');
-        promoCodeError.innerText = 'Промокод не найден';
-        promoCodeSuccess.classList.add('hidden');
-        selected.value.price = previousPrice.value;
-      }
-    }
+  
+    promoCodeError.classList.remove('hidden');
+    promoCodeError.innerText = promoCodeData.data.msg;
+    promoCodeSuccess.classList.add('hidden');
+    donateBtn.disabled = true;
     return false;
   }
 
@@ -226,7 +182,7 @@
                   </ul>   
                   <NuxtLink class="donate_link" :bind="donate.link" :to="'/info/'+donate.link" target="_blank">Подробнее...</NuxtLink>
               </div>
-              <label :key="donate.uid" :id="'buy_'+donate.uid" class="feimisio_btn" @click="selected.uid = donate.uid; selected.name = donate.name; selected.price = donate.price; previousPrice = donate.price; promoCode = ''; modalShow = true">Приобрести</label>
+              <label :key="donate.uid" :id="'buy_'+donate.uid" class="feimisio_btn" @click="selected.uid = donate.uid; selected.name = donate.name; selected.price = donate.price; promoCode = ''; modalShow = true">Приобрести</label>
             </div>
           </template>
           <template v-else>
@@ -262,7 +218,7 @@
                 Промокод не найден
               </label>
               <label class="text-success hidden" id="promocode_success" for="promocode">
-                Промокод найден (Скидка: {{ promoCodeDiscount }}%)
+                Промокод найден
               </label>
               <input v-model="promoCode" class="text_input" id="promocode" name="promocode" type="text" placeholder="Промокод" autocomplete="off">
               <p class="block mt-4">Выберите платежную систему:</p>
