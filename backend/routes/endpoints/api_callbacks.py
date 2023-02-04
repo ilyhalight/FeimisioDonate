@@ -203,30 +203,17 @@ async def index(
         custom_field (list|dict|tuple): Строка или массив который вы передавали в параметр "cf"
     """
     if str(merchant) == os.environ.get('ENOT_SHOPID'):
-        log.debug(merchant)
-        log.debug(amount)
         log.debug(credited)
-        log.debug(intid)
-        log.debug(merchant_id)
-        log.debug(method)
-        log.debug(sign)
-        log.debug(sign_2)
-        log.debug(currency)
-        log.debug(payer_details)
         log.debug(commission)
-        log.debug(commission_pay)
         log.debug(custom_field)
         log.debug('SIGN is valid')
         server_sign_2 = sign_md5(merchant, amount, os.environ.get('ENOT_SECRET2'), merchant_id)
-        log.debug(server_sign_2)
-        log.debug(sign_2)
         if server_sign_2 != sign_2:
             log.debug('wrong sign 2 ')
             return JSONResponse(content = {'error': 'Wrong SIGN'}, status_code = status.HTTP_403_FORBIDDEN)
         log.debug('SIGN 2 is valid')
         p_uid = custom_field.split(',')[0]
         p_amount = str(custom_field.split(',')[1])
-        log.debug(p_amount)
         new_amount = amount.split('.')[0]
         log.debug(new_amount)
         if str(new_amount) != str(p_amount):
