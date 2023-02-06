@@ -49,16 +49,7 @@ async def index(steam_link: str = Form(), uid: int = Form(), aggregator: str = F
                 crystalpay_shopid = os.environ.get('CRYSTALPAY_SHOPID')
                 crystalpay_secret = os.environ.get('CRYSTALPAY_SECRET')
                 async with aiohttp.ClientSession() as session:
-                    # async with session.get('https://api.crystalpay.ru/v1/', params = {
-                    #     'o': 'invoice-create',
-                    #     'n': crystalpay_shopid,
-                    #     's': crystalpay_secret,
-                    #     'amount': price,
-                    #     'lifetime': 30,
-                    #     'redirect': 'http://127.0.0.1:3999/results/success',
-                    #     'callback': 'http://127.0.0.1:3312/api/callback/crystalpay',
-                    #     'extra': f'{uid},{price},{steam_arr},{promocode}'
-                    async with session.post('https://api.crystalpay.ru/v2/invoice/create/', json = {
+                    async with session.post('https://api.crystalpay.io/v2/invoice/create/', json = {
                         'auth_login': crystalpay_shopid,
                         'auth_secret': crystalpay_secret,
                         'amount': price,
