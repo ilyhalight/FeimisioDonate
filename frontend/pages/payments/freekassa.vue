@@ -1,102 +1,81 @@
 <script setup>
   import { v4 as uuidv4 } from 'uuid';
-  import MD5 from 'crypto-js/md5';
+  import config from '~/config/config.js';
+  import { signMD5v2 } from '~/utils/sign.js';
+  import { getPrivilegeByUID } from '~/utils/getPrivileges.js';
+
+  const route = useRoute();
+  const { t } = useI18n();
+
+  definePageMeta({
+    title: 'Freekassa'
+  });
 
   useHead({
-    title: "Freekassa · Feimisio Donate",
     meta: [
       {
-        name: "og:title",
-        content: "Freekassa - Feimisio Donate"
+        name: "description",
+        content: `${t('Paying for a privilege with')} Freekassa`
       },
     ]
   });
 
-  const config = useRuntimeConfig();
-  const freekassaSecret = config.public.freekassaSecret;
-  const shopID = config.public.freekassaShopID;
+  const freekassaSecret = config.freekassaSecret;
+  const shopID = config.freekassaShopID;
+
+  const uid = ref(0);
+  const price = ref(10000000);
+  const steamLink = ref('');
+  const payID = ref(0);
+  const currency = ref('RUB');
+  const promoCode = ref('');
+
+  payID.value = uuidv4(); 
+
+  uid.value = route.query.uid;
+  price.value = route.query.price;
+  steamLink.value = route.query.steam;
+  currency.value = route.query.currency;
+  promoCode.value = route.query.promocode;
+
+  if (uid.value > 0) {
+    const data = await getPrivilegeByUID(uid.value);
+    if (data) {
+      if (data.discount > 0 && data.price > 0) {
+        price.value = Math.round(data.price - (data.price / 100 * data.discount))
+      } else {
+        price.value = data.price;
+      }
+    }
+  }
+
+  onMounted(() => {
+    let form = document.getElementById('freekassa_form');
+    form.submit();
+  });
 </script>
 
+
+
 <template>
-  <main class="centered_container m-6 mt-2 md:mt-6">
-    <div class="mx-10">
-      <p class="page_title">Форма оплаты Freekassa</p>
-      <p class="page_description">При возникновении ошибок отпишите по контактам</p>
-      <form class="flex justify-center" id="freekassa_form" action="https://pay.freekassa.ru/" method="get">
+  <main class="wrapper">
+    <div>
+      <p class="text-attractive">{{ $t('Form of payment')}} Freekassa</p>
+      <p class="subtext-attractive">{{ $t('If you encounter any errors, write to support') }}</p>
+      <form id="freekassa_form" action="https://pay.freekassa.ru/" method="get">
         <input id='form-input-m' type='hidden' name='m' :value='shopID'>
         <input id='form-input-oa' type='hidden' name='oa' :value='price'>
         <input id='form-input-o' type='hidden' name='o' :value='payID'>
-        <input id='form-input-s' type='hidden' name='s' :value='sign(freekassaSecret, shopID)'>
-        <input id='form-input-currency' type='hidden' name='currency' value='RUB'>
+        <input id='form-input-s' type='hidden' name='s' :value='signMD5v2(shopID, price, freekassaSecret, currency, payID)'>
+        <input id='form-input-currency' type='hidden' name='currency' :value='currency'>
         <input id='form-input-i' type='hidden' name='i' value='1'>
         <input id='form-input-lang' type='hidden' name='lang' value='ru'>
         <input id='form-input-us' type='hidden' name='us_uid' :value='uid'>
         <input id='form-input-us' type='hidden' name='us_price' :value='price'>
         <input id='form-input-us' type='hidden' name='us_steamLink' :value='steamLink'>
         <input id='form-input-us' type='hidden' name='us_promoCode' :value='promoCode'>
-        <input class='donate_btn' id='form-input-submit' type="submit" value="Перейти"/>
+        <input class='button' id='form-input-submit' type="submit" :value="$t('Purchase')"/>
       </form>
     </div>
   </main>
 </template>
-
-<script>
-  export default {
-    data() {
-      return {
-        uid: 0,
-        price: 10000000,
-        steamLink: '',
-        payID: '',
-        promoCode: ''
-      };
-    },
-
-    created: async function() {
-      this.payID = uuidv4();
-      if (process.client) {
-        const windowData = Object.fromEntries(
-          new URL(window.location).searchParams.entries()
-        );
-
-        if (windowData.uid) {
-          this.uid = windowData.uid;
-        }
-
-        if (windowData.price) {
-          this.price = windowData.price;
-        }
-
-        if (windowData.steam) {
-          this.steamLink = windowData.steam;
-        }
-
-        if (windowData.promocode) {
-          this.promoCode = windowData.promocode;
-        }
-
-        if (this.uid > 0) {
-          const data = await $fetch(`http://127.0.0.1:3999/api/privillege?uid=${this.uid}`);
-          if (data) {
-            if (data.discount > 0 && data.price > 0) {
-              this.price = Math.round(data.price - (data.price / 100 * data.discount))
-            } else {
-              this.price = data.price;
-            }
-          }
-        }
-        let form = document.getElementById('freekassa_form');
-        form.submit();
-      }
-    },
-
-    methods: {
-      uuidv4() {
-        return uuidv4();
-      },
-      sign(secret, shopID) {
-        return MD5(shopID.toString() + ':' + this.price + ':' + secret.toString() + ':' + 'RUB' + ':' + this.payID)
-      }
-    }
-  }
-</script>

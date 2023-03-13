@@ -1,111 +1,62 @@
 <script setup>
-  import { useRoute } from 'vue-router'
-  const route = useRoute()
+  import { useRoute } from 'vue-router';
+  import config from '~/config/config.js';
+
+  const route = useRoute();
   const id = route.params.id;
-  useHead({
-    title: `${id} · Feimisio Donate`,
-    meta: [
-      {
-        name: "og:title",
-        content: `${id} - Feimisio Donate`
-      },
-    ]
+  const { t } = useI18n();
+
+  const privilegeInfo = ref([]);
+
+  privilegeInfo.value = await getPrivilegeInfoByName(id);
+  if (!privilegeInfo.value) {
+    throw createError({ statusCode: 404, message: t('Unknown privilege'), fatal: true})
+  }
+
+  useServerSeoMeta ({
+    title: id,
+    // ogTitle: id,
+    description: `${t('Information about')} ${id}`,
+    // ogDescription: `${t('Information about')} ${id}`
   });
 </script>
 
 
 <template>
-  <main class="centered_container m-6 mt-2 md:mt-6">
-    <template v-if="privillegeInfo.length">
-      <div class="flex flex-col items-center">
-        <p class="text-2xl">Информация о {{ privillegeInfo[0].link }}</p>
-        <NuxtLink to="/" class="donate_link">← Вернуться назад</NuxtLink>
-      </div>
-      <section class="flex flex-col md:flex-row flex-wrap mt-4">
-          <div v-for="privillege in privillegeInfo" :key="privillege.uid" 
-          class="flex m-4 p-4"
-          :class="
-            (privillege.img_link && privillege.is_big_img ?
-              privillege.img_reverse_side ?
-                'flex-col-reverse md:flex-row-reverse' : 'flex-col md:flex-row'
-              : privillege.img_link ?
-                  privillege.img_reverse_side ?
-                    'flex-row-reverse' : 'flex-row'
-                : 'flex-col')+
-            (privillege.is_big_img ? ' w-66 md:w-[100%]' : ' w-76 md:w-[30rem]')">
-              <img v-if="privillege.img_link" class="rounded-lg" :class="privillege.is_big_img ? 'max-w-sm w-[95%] md:max-w-md md:w-full h-full' : 'w-36 h-36'" :src="privillege.img_link" :alt="privillege.name+' пример'">
-              <template v-if="privillege.img_link">
-                <div class="flex-col mt-4 md:mt-0" :class="privillege.is_big_img ? 'w-full md:m-4' : 'm-4'">
-                  <p class="text-start font-bold text-xl">{{ privillege.name }}</p>
-                  <p class="text-start text-md" :class="privillege.img_reverse_side ? 'mb-4 md:mb-0': ''">{{ privillege.desc }}</p>
-                </div>
-              </template>
-              <template v-else>
-                <p class="text-start font-bold text-xl">{{ privillege.name }}</p>
-                <p class="text-start text-md">{{ privillege.desc }}</p>
-              </template>
+  <main class="wrapper">
+    <Breadcrumbs>
+      <template #breadcrumb="{ to, title }">
+        <NuxtLink :to="to">
+          <template v-if="!title.toLowerCase().includes(id.toLowerCase())">
+            {{ $t(title) }}
+          </template>
+          <template v-else>
+            {{ id }}
+          </template>
+        </NuxtLink>
+      </template>
+    </Breadcrumbs>
+    <template v-if="privilegeInfo.length">
+      <p class="text-attractive center">
+        {{ $t('Information about')}}
+        <span class="text-gradient">
+          {{ privilegeInfo[0].link }}
+        </span>
+      </p>
+      <section class="privilege_info">
+        <div v-for="privilege in privilegeInfo" :key="privilege.uid" class="block" :class="(privilege.img_link ? 'has-img': '') + (privilege.is_big_img ? ' big': '') + (privilege.img_reverse_side ? ' reverse' : '')">
+          <img v-if="privilege.img_link" :class="privilege.is_big_img ? 'big' : ''" :src="privilege.img_link" :alt="$t(privilege.name)+' '+$t('example')">
+          <div class="text-block" :class="privilege.is_big_img ? 'big' : 'small'">
+            <p class="title">{{ $t(privilege.name) }}</p>
+            <p class="subtext" :class="privilege.img_reverse_side ? 'reverse': ''">{{ $t(privilege.desc) }}</p>
           </div>
+        </div>
       </section>
     </template>
     <template v-else>
-      <div class="flex flex-col items-center animate-pulse">
-        <div class="loading_default w-64"></div>
-        <div class="loading_default w-48"></div>
-      </div>
-      <section class="flex flex-col md:flex-row flex-wrap mt-4 justify-between animate-pulse">
-        <div v-for="i in [1,2,3]" :key="i" class="flex m-4 p-4 flex-row w-76 md:w-96">
-          <div class="w-36 bg-neutral rounded"></div>
-          <div class="flex-col mt-4 md:mt-0 m-4">
-            <div class="loading_default w-28"></div>
-            <div class="loading_default w-40"></div>
-            <div class="loading_default w-44"></div>
-            <div class="loading_default w-36"></div>
-          </div>
-        </div>
-        <div class="flex m-4 p-4 flex-col md:flex-row w-66 md:w-[100%]">
-          <div class="max-w-sm w-[95%] md:max-w-md md:w-full h-80 bg-neutral rounded"></div>
-          <div class="flex-col mt-4 md:mt-0 w-full md:m-4">
-            <div class="loading_default w-64"></div>
-            <div class="loading_default w-full"></div>
-            <div class="loading_default w-[99%]"></div>
-            <div class="loading_default w-96"></div>
-          </div>
-        </div>
-        <div class="flex m-4 p-4 flex-col md:flex-row-reverse w-66 md:w-[100%]">
-          <div class="max-w-sm w-[95%] md:max-w-md md:w-full h-80 bg-neutral rounded"></div>
-          <div class="flex-col mt-4 md:mt-0 w-full md:m-4">
-            <div class="loading_default w-64"></div>
-            <div class="loading_default w-full"></div>
-            <div class="loading_default w-[99%]"></div>
-            <div class="loading_default w-96"></div>
-          </div>
-        </div>
-      </section>
+      <p class="text-attractive center">
+        {{ $t('Connection error') }}
+      </p>
     </template>
   </main>
 </template>
-
-<script>
-  export default {
-    data() {
-      return {
-        privillegeInfo: []
-      }
-    },
-
-    created: async function() {
-      const { id } = this.$route.params;
-      const privillegeData = await $fetch(
-        `http://127.0.0.1:3312/api/privillege/info?name=${id}`
-      );
-      if (privillegeData) {
-        this.privillegeInfo = privillegeData;
-      } else {
-        throw createError({ statusCode: 404, message: 'Вы пытаетесь найти информацию о неизвестной привилегии.', fatal: true})
-        // fatal:
-        // false - only server error
-        // true - client & server error (show block with error)
-      }
-    }
-  }
-</script>

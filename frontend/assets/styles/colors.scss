@@ -1,0 +1,42 @@
+:root {
+    --background: rgb(5, 1, 13); // #05010d
+    --background-second: #1E1A25;
+    --background-third: #37343D;
+    --background-fourth: #252329;
+    --primary: #6080ff;
+    --primary-600: rgba(96, 128, 255, 0.6);
+    --white: rgba(255, 255, 255, 1);
+    --white-600: rgba(255, 255, 255, 0.6);
+    --white-800: rgba(255, 255, 255, 0.8);
+    --gradient: linear-gradient(90deg, #6080ff 0%, #9aaefd 100%);
+    --error: #F03D3D;
+    --success: #48D64E;
+    --gray: #3d4451;
+    --gray-hover: #303640;
+}
+
+
+.light-mode {
+    --background: #ffffff;
+    --background-second: #e5e5e5;
+    --background-third: #cccccc;
+    --background-fourth: #888888;
+    --white: rgb(5, 1, 13); // #05010d
+    --white-600: rgba(5, 1, 13, 0.6);
+    --white-800: rgba(5, 1, 13, 0.8);
+}
+
+$background: var(--background); // #05010d
+$background-second: var(--background-second);
+$background-third: var(--background-third);
+$background-fourth: var(--background-fourth);
+$primary: var(--primary);
+$primary-600: var(--primary-600);
+$white: var(--white);
+$white-600: var(--white-600);
+$white-800: var(--white-800);
+$gradient: var(--gradient);
+$error: var(--error);
+$success: var(--success);
+$gray: var(--gray);
+$gray-hover: var(--gray-hover);
