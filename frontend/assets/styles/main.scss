@@ -226,10 +226,12 @@ a.text-gradient:hover {
   margin-top: 40px;
   visibility: hidden;
   opacity: 0;
+  background: $background;
   &.active {
     visibility: visible;
     opacity: 1;
     transition: all 0.3s ease;
+    z-index: 1000;
   }
   .menu-item {
     padding: 10px;
@@ -416,7 +418,7 @@ a.text-gradient:hover {
   &:hover {
     background: $primary-600;
   }
-  .gradient {
+  &.gradient {
     background: linear-gradient(to right, #fc466b, #3f5efb);
     &:hover {
       background: $white;
@@ -659,6 +661,81 @@ nav[aria-label="Breadcrumb"] {
         list-style: none;
       }
       padding-right: 15px;
+    }
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: .5;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(.4,0,.6,1) infinite;
+}
+
+.result-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 50px;
+  .result {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: $background;
+    border-radius: 8px;
+    width: 33%;
+    box-shadow: 0 0 $primary, 0 0 $primary, 0 10px 15px -3px $primary-100,0 4px 6px -4px $primary-100;
+  
+    .result-top {
+      max-width: 144px;
+      width: 144px;
+      max-height: 144px;
+      height: 144px;
+      border-radius: 50%;
+      margin-top: -4rem;
+    }
+
+    .results-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 25px;
+      .results-texts {
+        display: flex;
+        flex-direction: column;
+        text-align: center;
+        .title {
+          font-size: 1.75rem;
+          font-weight: 700;
+          line-height: 1.75rem;
+          margin-bottom: 10px;
+        }
+        .description {
+          font-size: 1.25rem;
+          line-height: 1.75rem;
+          margin-bottom: 25px;
+        }
+      }
+
+      .results-buttons {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 25px;
+        .button {
+          font-weight: 600;
+          font-size: 0.875rem;
+          width: 20rem;
+          text-transform: uppercase;
+          margin: 10px 0;
+        }
+      }
     }
   }
 }
