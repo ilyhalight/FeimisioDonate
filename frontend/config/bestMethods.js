@@ -63,7 +63,13 @@ const bestAggregators = () => {
                     minPrice: 10,
                     commission: 2.5, // 2.5% you - 2.5% client, edit if you edit this in dashboard
                     disabled: false
-                }
+                },
+                {
+                    name: 'paypalych',
+                    minPrice: 15,
+                    commission: 8.0,
+                    disabled: false
+                },
             ]
         },
         {
@@ -73,12 +79,18 @@ const bestAggregators = () => {
                     name: 'enot',
                     minPrice: 10,
                     commission: 6.0,
-                    disabled: false
+                    disabled: true
                 },
                 {
                     name: 'freekassa',
                     minPrice: 10,
                     commission: 7.0,
+                    disabled: true
+                },
+                {
+                    name: 'paypalych',
+                    minPrice: USD_PRICE,
+                    commission: 8.0,
                     disabled: false
                 },
             ]
