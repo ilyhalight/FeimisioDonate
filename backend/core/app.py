@@ -25,12 +25,24 @@ def custom_openapi():
 
 tags_meta = [
     {
-        'name': 'Privilleges',
-        'description': 'Operations with privilleges'
+        'name': 'Privileges',
+        'description': 'Operations with privileges'
     },
     {
         'name': 'Methods',
         'description': 'Operations with payment methods'
+    },
+    {
+        'name': 'Payment Systems',
+        'description': 'Operations with payment systems'
+    },
+    {
+        'name': 'Promocodes',
+        'description': 'Operations with promocodes'
+    },
+    {
+        'name': 'Callbacks',
+        'description': 'Getting callbacks from payment systems'
     },
 ]
 
