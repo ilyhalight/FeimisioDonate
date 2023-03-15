@@ -2,73 +2,91 @@ import json
 import aiofiles
 import logging
 
-from sql.privillege.controller import DbPrivillegeController
-from sql.privillege_info.controller import DbPrivillegeInfoController
+from sql.privilege.controller import DbPrivilegeController
+from sql.privilege_info.controller import DbPrivilegeInfoController
 from sql.promocodes.controller import DbPromocodesController
+from sql.payment_systems.controller import DbPaymentSystemsController
 
 log = logging.getLogger('worker')
 
 
-async def save_privilleges_to_json():
+async def save_privileges_to_json():
     """Сохраняет доступные привилегии из базы данных в json файл"""
-    privilleges = await DbPrivillegeController().get_all()
-    async with aiofiles.open('config/privilleges.json', 'w', encoding = 'utf-8') as f:
-        await f.write(json.dumps(privilleges))
-        log.info('privilleges saved to json')
+    privileges = await DbPrivilegeController().get_all()
+    async with aiofiles.open('config/privileges.json', 'w', encoding = 'utf-8') as f:
+        await f.write(json.dumps(privileges, indent=4))
+        log.info('privileges saved to json')
         await f.close()
 
-async def get_privilleges_json():
+async def get_privileges_json():
     """Возвращает доступные привилегии из json файла"""
     try:
-        async with aiofiles.open('config/privilleges.json', 'r', encoding = 'utf-8') as f:
-            privilleges = await f.read()
-            return json.loads(privilleges)
+        async with aiofiles.open('config/privileges.json', 'r', encoding = 'utf-8') as f:
+            privileges = await f.read()
+            return json.loads(privileges)
     except FileNotFoundError:
         return []
 
-async def find_privilleges_json(uid: int):
+async def find_privileges_json(uid: int):
     """Возвращает информацию о привилегии из json файла по uid"""
-    privilleges = await get_privilleges_json()
-    if privilleges:
-        for privillege in privilleges:
-            if privillege['uid'] == uid:
-                return privillege
+    privileges = await get_privileges_json()
+    if privileges:
+        for privilege in privileges:
+            if privilege['uid'] == uid:
+                return privilege
     return []
 
-async def save_privilleges_info_to_json():
+async def save_privileges_info_to_json():
     """Сохраняет информацию о привилегии из базы данных в json файл"""
-    privilleges = await DbPrivillegeInfoController().get_all()
-    async with aiofiles.open('config/privilleges_info.json', 'w', encoding = 'utf-8') as f:
-        await f.write(json.dumps(privilleges))
-        log.info('privilleges info saved to json')
+    privileges = await DbPrivilegeInfoController().get_all()
+    async with aiofiles.open('config/privileges_info.json', 'w', encoding = 'utf-8') as f:
+        await f.write(json.dumps(privileges, indent=4))
+        log.info('privileges info saved to json')
         await f.close()
 
-async def get_privilleges_info_json():
+async def get_privileges_info_json():
     """Возвращает информацию о привилегии из json файла"""
     try:
-        async with aiofiles.open('config/privilleges_info.json', 'r', encoding = 'utf-8') as f:
-            privilleges = await f.read()
-            return json.loads(privilleges)
+        async with aiofiles.open('config/privileges_info.json', 'r', encoding = 'utf-8') as f:
+            privileges = await f.read()
+            return json.loads(privileges)
     except FileNotFoundError:
         return []
 
-async def find_privilleges_info_json(link: str):
+async def find_privileges_info_json(link: str):
     """Возвращает информацию о привилегии из json файла по названию привилегии (link)"""
-    privilleges = await get_privilleges_info_json()
+    privileges = await get_privileges_info_json()
     res = []
-    if privilleges:
-        for privillege in privilleges:
-            if privillege['link'] == link:
-                res.append(privillege)
+    if privileges:
+        for privilege in privileges:
+            if privilege['link'] == link:
+                res.append(privilege)
     return res
 
 async def save_promocodes_to_json():
     """Сохраняет доступные промокоды из базы данных в json файл"""
     promocodes = await DbPromocodesController().get_all()
     async with aiofiles.open('config/promocodes.json', 'w', encoding = 'utf-8') as f:
-        await f.write(json.dumps(promocodes))
+        await f.write(json.dumps(promocodes, indent=4))
         log.info('promocodes saved to json')
         await f.close()
+
+async def save_payment_systems_to_json():
+    """Сохраняет доступные платежки из базы данных в json файл"""
+    payment_systems = await DbPaymentSystemsController().get_all()
+    async with aiofiles.open('config/payment_systems.json', 'w', encoding = 'utf-8') as f:
+        await f.write(json.dumps(payment_systems, indent=4))
+        log.info('payment systems saved to json')
+        await f.close()
+
+async def get_payment_systems_json():
+    """Возвращает доступные платежки из json файла"""
+    try:
+        async with aiofiles.open('config/payment_systems.json', 'r', encoding = 'utf-8') as f:
+            payment_systems = await f.read()
+            return json.loads(payment_systems)
+    except FileNotFoundError:
+        return []
 
 async def get_promocodes_json():
     """Возвращает доступные промокоды из json файла"""
