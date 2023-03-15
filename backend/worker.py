@@ -27,7 +27,9 @@ def init_worker():
     @app.on_event("startup")
     @repeat_every(seconds = 60 * 5)  # 5 min
     async def worker():
+        log.info('Recache worker started')
         await save_privileges_to_json()
         await save_privileges_info_to_json()
         await save_promocodes_to_json()
         await save_payment_systems_to_json()
+        log.info('Recache worker finished')
