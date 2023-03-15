@@ -12,14 +12,14 @@ from logger.masslog import MassLog
 from utils.converters import SteamConverters
 from utils.console.source import add_vip_ingame
 from utils.price import get_final_price
-from utils.db import find_privilleges_json, find_promocodes_json
+from utils.db import find_privileges_json, find_promocodes_json
 from sql.vip_users.controller import VipUsersController
 from sql.sb_admins.controller import SBAdminsController
 from sql.promocode_uses.controller import DbPromocodeUsesController
 
 log = logging.getLogger('server')
 
-async def give_privillege_callback(aggregator: str, p_uid: int, p_steam_link: str, amount: int, commission: str, method: str, p_promo_code: str):
+async def give_privilege_callback(aggregator: str, p_uid: int, p_steam_link: str, amount: int, commission: str, method: str, p_promo_code: str):
     """Общая функция для выдачи привилегий
 
     Args:
@@ -31,8 +31,8 @@ async def give_privillege_callback(aggregator: str, p_uid: int, p_steam_link: st
         method (str): метод платежа
         p_promo_code (str): промокод
     """
-    privilleges = await find_privilleges_json(int(p_uid))
-    if privilleges:
+    privileges = await find_privileges_json(int(p_uid))
+    if privileges:
         if p_steam_link.startswith('id'):
             us_steamLink_arr = p_steam_link.split('id', maxsplit = 1)
             part = 'id/'
@@ -46,15 +46,15 @@ async def give_privillege_callback(aggregator: str, p_uid: int, p_steam_link: st
         else:
             steam_link = p_steam_link
         
-        price_privillege = await get_final_price(privilleges['price'], privilleges['discount'], p_promo_code)
-        if int(price_privillege) != int(amount):
-            await MassLog().error(f'[Пользователь]({steam_link}) оплатил привилегию **{escape_md(privilleges["name"])}** \(UID: **{p_uid}**\) за **{escape_md(amount)}** руб\. \(комиссия: **{escape_md(commission)}**\, настоящая цена: **{escape_md(price_privillege)}**\) через **{escape_md(aggregator)}** \(Метод: **{escape_md(method)}** \| Промокод: **{escape_md(p_promo_code)}**\)\n\n**ОШИБКА:** Не совпадает сумма платежа и цена привилегии!!!')
+        price_privilege = await get_final_price(privileges['price'], privileges['discount'], p_promo_code)
+        if int(price_privilege) != int(amount):
+            await MassLog().error(f'[Пользователь]({steam_link}) оплатил привилегию **{escape_md(privileges["name"])}** \(UID: **{p_uid}**\) за **{escape_md(amount)}** руб\. \(комиссия: **{escape_md(commission)}**\, настоящая цена: **{escape_md(price_privilege)}**\) через **{escape_md(aggregator)}** \(Метод: **{escape_md(method)}** \| Промокод: **{escape_md(p_promo_code)}**\)\n\n**ОШИБКА:** Не совпадает сумма платежа и цена привилегии!!!')
             return JSONResponse(content = {'auth': 'OK', 'status': 'error', 'message': 'Не совпадает сумма платежа и цена привилегии!'}, status_code = status.HTTP_402_PAYMENT_REQUIRED)
 
         if int(amount) != 0:
-            await MassLog().success(f'[Пользователь]({steam_link}) оплатил привилегию **{escape_md(privilleges["name"])}** \(UID: **{p_uid}**\) за **{escape_md(amount)}** руб\. \(комиссия: **{escape_md(commission)}**\) через **{escape_md(aggregator)}** \(Метод: **{escape_md(method)}** \| Промокод: **{escape_md(p_promo_code)}**\)')
+            await MassLog().success(f'[Пользователь]({steam_link}) оплатил привилегию **{escape_md(privileges["name"])}** \(UID: **{p_uid}**\) за **{escape_md(amount)}** руб\. \(комиссия: **{escape_md(commission)}**\) через **{escape_md(aggregator)}** \(Метод: **{escape_md(method)}** \| Промокод: **{escape_md(p_promo_code)}**\)')
         else:
-            await MassLog().info(f'[Пользователь]({steam_link}) запросил бесплатную привилегию {escape_md(privilleges["name"])} \(промокод: {escape_md(p_promo_code)}\)')
+            await MassLog().info(f'[Пользователь]({steam_link}) запросил бесплатную привилегию {escape_md(privileges["name"])} \(промокод: {escape_md(p_promo_code)}\)')
         res = await giver_csgo(p_uid, steam_link)
         steamid64 = SteamConverters().url_to_steam64(steam_link)
         steamid = SteamConverters().to_steamID(steamid64)
@@ -64,7 +64,7 @@ async def give_privillege_callback(aggregator: str, p_uid: int, p_steam_link: st
                 await DbPromocodeUsesController().add(p_promo_code, steamid, p_uid, int(time.time()))
                 log.info(f'Added promocode {p_promo_code} usages to Database')
             except Exception:
-                await MassLog().success(f'Произошла ошибка при добавление использования промокода {escape_md(p_promo_code)} в Базу Данных\. \([Пользователь]({steam_link})**, привилегия: {escape_md(privilleges["name"])}** \({p_uid}\), цена: **{escape_md(amount)}** руб\. \(комиссия: **{escape_md(commission)}**) через **{escape_md(aggregator)}** \(Метод: **{escape_md(method)}**\)')
+                await MassLog().success(f'Произошла ошибка при добавление использования промокода {escape_md(p_promo_code)} в Базу Данных\. \([Пользователь]({steam_link})**, привилегия: {escape_md(privileges["name"])}** \({p_uid}\), цена: **{escape_md(amount)}** руб\. \(комиссия: **{escape_md(commission)}**) через **{escape_md(aggregator)}** \(Метод: **{escape_md(method)}**\)')
                 log.exception('Error while adding usage to promo')
         if res:
             if amount != 0:
@@ -73,15 +73,15 @@ async def give_privillege_callback(aggregator: str, p_uid: int, p_steam_link: st
                 return RedirectResponse(url = f'/results/success', status_code = status.HTTP_303_SEE_OTHER)
         else:
             return JSONResponse(content = {'auth': 'OK', 'status': 'error', 'message': 'Не удалось выдать привилегию'}, status_code = status.HTTP_200_OK)
-    log.debug('privilleges is wrong')
-    return JSONResponse(content = {'error': 'unknown privillege uid'}, status_code = status.HTTP_400_BAD_REQUEST)
+    log.debug('privileges is wrong')
+    return JSONResponse(content = {'error': 'unknown privilege uid'}, status_code = status.HTTP_400_BAD_REQUEST)
 
 
-async def giver_csgo(privillege_uid: int, steamlink: str):
+async def giver_csgo(privilege_uid: int, steamlink: str):
     """Добавляет привилегию пользователю на CS:GO сервере
     
         Args:
-            privillege_uid (int): UID привилегии
+            privilege_uid (int): UID привилегии
             steamlink (str): Ссылка на профиль Steam
     """
     try:
@@ -94,26 +94,26 @@ async def giver_csgo(privillege_uid: int, steamlink: str):
     except Exception as err:
         await MassLog().error(f'Произошла ошибка при конвертации Steam\-ссылки в Ник\: {err}')
         nickname = 'unnamed'
-    privillege = await find_privilleges_json(int(privillege_uid))
-    if steamid and privillege and privillege['name']:
-        duration = privillege['duration']
+    privilege = await find_privileges_json(int(privilege_uid))
+    if steamid and privilege and privilege['name']:
+        duration = privilege['duration']
         if duration == 0:
             seconds = 0
         else:
             seconds = duration * 3600
-        status = await give_on_csgo_server(steamid, nickname, privillege['name'], seconds)
+        status = await give_on_csgo_server(steamid, nickname, privilege['name'], seconds)
         if status is False:
             account_id = SteamConverters().to_steamID3(steamid)
             if duration == 0:
                 expires = 0
             else:
                 expires = int(time.time()) + seconds
-            db_status = await give_csgo_database(account_id, nickname, privillege['name'], expires)
+            db_status = await give_csgo_database(account_id, nickname, privilege['name'], expires)
             await MassLog().log_by_type(db_status['status'], db_status['logs'])
             return db_status
         await MassLog().log_by_type(db_status['status'], db_status['logs']) 
         return status
-    await MassLog().error(f'Произошла ошибка при добавлении привилегии на сервере CS\:GO\.\n\nПроверьте правильность введенных данных: {privillege_uid} \(данные о привилегии\: {escape_md(privillege)}\)\, {escape_md(steamlink)} \(steamid\: {escape_md(steamid)}\)')
+    await MassLog().error(f'Произошла ошибка при добавлении привилегии на сервере CS\:GO\.\n\nПроверьте правильность введенных данных: {privilege_uid} \(данные о привилегии\: {escape_md(privilege)}\)\, {escape_md(steamlink)} \(steamid\: {escape_md(steamid)}\)')
     return False
 
 async def give_on_csgo_server(steamid: int, name: str, group: str, seconds: int):
