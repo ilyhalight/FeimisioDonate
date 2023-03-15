@@ -36,7 +36,7 @@ class DbPrivilegeService:
         finally:
             db.close() if db else None
 
-    async def add_privilege(self, name: str, price: int, link: str, duration: int, discount: int, short_description: str, disabled: bool):
+    async def add_privilege(self, name: str, price: int, link: str, duration: int, discount: int, short_description: str, bg_color: str, image: str, disabled: bool):
         """Добавляет привилегию в базу данных
 
         Args:
@@ -46,6 +46,8 @@ class DbPrivilegeService:
             duration: продолжительность привилегии (в часах)
             discount: скидка на привилегию
             short_description: короткое описание привилегии ("Вы получите")
+            bg_color: Цвет фона картинки
+            image: Ссылка на картинку
             disabled: включена ли привилегия
 
         Returns:
@@ -55,7 +57,7 @@ class DbPrivilegeService:
         db = await DefaultConnector().connect()
         try:
             async with db.cursor() as cursor:
-                await cursor.execute('INSERT INTO `fd_privilege` (`name`, `price`, `link`, `duration`, `discount`, `short_description`, `disabled`) VALUES (%s, %s, %s, %s, %s, %s, %s)', (name, price, link, duration, discount, short_description, disabled))
+                await cursor.execute('INSERT INTO `fd_privilege` (`name`, `price`, `link`, `duration`, `discount`, `short_description`, `disabled`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)', (name, price, link, duration, discount, short_description, bg_color, image, disabled))
                 await db.commit()
                 return True
         except AttributeError as err:
