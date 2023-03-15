@@ -1,6 +1,6 @@
 config/servers.json
-config/privilleges.json
-config/privilleges_info.json
+config/privileges.json
+config/privileges_info.json
 config/promocodes.json
 
 # Editor
