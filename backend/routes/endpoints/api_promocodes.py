@@ -6,7 +6,7 @@ from fastapi.responses import JSONResponse
 from models.promocode_uses import PromocodeUses
 from models.promocodes import Promocodes
 from sql.promocode_uses.controller import DbPromocodeUsesController
-from utils.db import get_promocodes_json, find_privilleges_json
+from utils.db import get_promocodes_json, find_privileges_json
 from utils.token import validate_token
 
 router = APIRouter()
@@ -47,11 +47,11 @@ async def index(authorization: str = Header(default = '')):
     return JSONResponse(content = {'error': 'Invalid token'}, status_code = status.HTTP_401_UNAUTHORIZED)
 
 @router.post('/promocodes/check', response_class = JSONResponse, summary = 'Check promocode', responses = check_promocodes_responses)
-async def index(privillege: int, promo: str = '', authorization: str = Header(default = '')):
+async def index(privilege: int, promo: str = '', authorization: str = Header(default = '')):
     """Проверка промокода
 
     Args:
-        privillege (int): айди привилегии в бд
+        privilege (int): айди привилегии в бд
         promo (str, optional): проверяемый промокод. По умолчанию - ''.
         authorization (str, optional): токен авторизации. По умолчанию - Header(default = '').
     """
@@ -77,29 +77,29 @@ async def index(privillege: int, promo: str = '', authorization: str = Header(de
                 return JSONResponse(content = {
                     'error': 'No data found',
                     'data': {
-                        'status': True,
-                        'msg': 'Список промокодов не найден'
+                        'status': False,
+                        'msg': 'The list of promo codes was not found'
                     }
                 }, status_code = status.HTTP_204_NO_CONTENT)
 
             for promocode in promocodes:
                 if promocode['key'] == promo:
-                    privillege = await find_privilleges_json(privillege)
-                    if not privillege:
+                    privilege = await find_privileges_json(privilege)
+                    if not privilege:
                         return JSONResponse(content = {
                             'error': 'Privilege not found',
                             'data': {
                                 'status': False,
-                                'msg': 'Привилегия не найдена'
+                                'msg': 'Privilege not found'
                             }
                         }, status_code = status.HTTP_200_OK)
 
-                    if promocode['min_price'] > privillege['price'] or promocode['max_price'] < privillege['price']:
+                    if promocode['min_price'] > privilege['price'] or promocode['max_price'] < privilege['price']:
                         return JSONResponse(content = {
                             'error': 'Promocode can\'t be applied to this privilege',
                             'data': {
                                 'status': False,
-                                'msg': 'Промокод не может быть применен к этой привилегии'
+                                'msg': 'Promocode can\'t be applied to this privilege'
                             }
                         }, status_code = status.HTTP_200_OK)
 
@@ -109,28 +109,29 @@ async def index(privillege: int, promo: str = '', authorization: str = Header(de
                             'error': 'Promocode uses limit reached',
                             'data': {
                                 'status': False,
-                                'msg': 'Превышено количество использований этого промокода'
+                                'msg': 'Promocode uses limit reached'
                             }
                         }, status_code = status.HTTP_200_OK)
 
                     return JSONResponse(content = {
                         'data': {
                             'status': True,
-                            'msg': f'Промокод найден (Скидка: {promocode["discount"]}%)'
+                            'msg': f'Promocode found',
+                            'discount': promocode['discount']
                         }
                     }, status_code = status.HTTP_200_OK)
             return JSONResponse(content = {
                 'error': 'Promocode not found',
                 'data': {
                     'status': False,
-                    'msg': 'Промокод не найден'
+                    'msg': 'Promocode not found'
                 }
             }, status_code = status.HTTP_200_OK)
     return JSONResponse(content = {
         'error': 'Invalid token',
         'data': {
             'status': True,
-            'msg': 'Неверный токен'
+            'msg': 'Invalid token'
         }
     }, status_code = status.HTTP_401_UNAUTHORIZED)
 
