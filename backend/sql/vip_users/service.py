@@ -34,7 +34,7 @@ class VipUsersService:
             log.error(f'Failed connection to database: {err}')
             return None
         except Exception as err:
-            log.exception(f'Failed to add a privillege to the database ({self.database_sc}): {err}')
+            log.exception(f'Failed to add a privilege to the database ({self.database_sc}): {err}')
             return None
         finally:
             db.close() if db else None
@@ -56,7 +56,7 @@ class VipUsersService:
             log.error(f'Failed connection to database: {err}')
             return None
         except Exception as err:
-            log.exception(f'Failed to get all privilleges from the database ({self.database_sc}): {err}')
+            log.exception(f'Failed to get all privileges from the database ({self.database_sc}): {err}')
             return None
         finally:
             db.close() if db else None
@@ -81,7 +81,7 @@ class VipUsersService:
             log.error(f'Failed connection to database: {err}')
             return None
         except Exception as err:
-            log.exception(f'Failed to get privilleges ({account_id}) from the database ({self.database_sc}): {err}')
+            log.exception(f'Failed to get privileges ({account_id}) from the database ({self.database_sc}): {err}')
             return None
         finally:
             db.close() if db else None
@@ -106,7 +106,7 @@ class VipUsersService:
             log.error(f'Failed connection to database: {err}')
             return None
         except Exception as err:
-            log.exception(f'Failed to remove user privillege to the database ({self.database_sc}): {err}')
+            log.exception(f'Failed to remove user privilege to the database ({self.database_sc}): {err}')
             return None
         finally:
             db.close() if db else None
