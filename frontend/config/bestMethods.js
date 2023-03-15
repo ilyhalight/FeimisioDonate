@@ -79,13 +79,13 @@ const bestAggregators = () => {
                     name: 'enot',
                     minPrice: 10,
                     commission: 6.0,
-                    disabled: true
+                    disabled: false
                 },
                 {
                     name: 'freekassa',
                     minPrice: 10,
                     commission: 7.0,
-                    disabled: true
+                    disabled: false
                 },
                 {
                     name: 'paypalych',
