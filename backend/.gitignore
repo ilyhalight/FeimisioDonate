@@ -2,6 +2,7 @@ config/servers.json
 config/privileges.json
 config/privileges_info.json
 config/promocodes.json
+config/payment_systems.json
 
 # Editor
 .vscode
