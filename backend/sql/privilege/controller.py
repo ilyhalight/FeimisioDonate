@@ -6,9 +6,9 @@ class DbPrivilegeController:
         """Создаёт таблицу в базе данных, если она не существует"""
         return await DbPrivilegeService().init_table()
 
-    async def add_privilege(self, name: str, price: int, link: str, duration: int, discount: int, short_description: str, disabled: bool = False):
+    async def add_privilege(self, name: str, price: int, link: str, duration: int, discount: int, short_description: str, bg_color: str, image: str = None, disabled: bool = False):
         """Добавляет привилегию в базу данных"""
-        return await DbPrivilegeService().add_privilege(name, price, link, duration, discount, short_description, disabled)
+        return await DbPrivilegeService().add_privilege(name, price, link, duration, discount, short_description, bg_color, image, disabled)
 
     async def get_all(self):
         """Возвращает все привилегии из базы данных"""
