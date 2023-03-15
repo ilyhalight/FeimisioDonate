@@ -3,13 +3,18 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
 
+from config.load import load_cfg
+
+settings = load_cfg()['SERVER']
+
+
 def custom_openapi():
     if app.openapi_schema:
         return app.openapi_schema
     openapi_schema = get_openapi(
-        title="FeimisioDonate",
+        title=settings['site_name'],
         version="1.0.0",
-        description="FeimisioDonate API Docs",
+        description=f"{settings['site_name']} API Docs",
         terms_of_service="/terms/",
         license_info = {
             "name": "MIT",
@@ -18,7 +23,7 @@ def custom_openapi():
     )
     openapi_schema["info"]["x-logo"] = {
         "url": "/api/static/assets/logo.svg",
-        "altText": "Логотип Feimisio"
+        "altText": "Логотип"
     }
     app.openapi_schema = openapi_schema
     return app.openapi_schema
