@@ -1,6 +1,6 @@
 import logging
 import os
-from fastapi import APIRouter, status, Form, Header
+from fastapi import APIRouter, Request, status, Form, Header
 from fastapi.responses import JSONResponse
 
 from models.crystalpay_request import CrystalPayRequest
@@ -107,7 +107,7 @@ async def index(data: CrystalPayRequest):
 
     if data.id and data.currency and data.signature:
         if data.state != 'payed':
-            log.debug('privilege not yes been paid')
+            log.debug('privilege not yet been paid')
             return JSONResponse(content = {'error': 'Privilege has not yet been paid'}, status_code = status.HTTP_402_PAYMENT_REQUIRED)
 
         if data.type != 'purchase':
@@ -161,7 +161,6 @@ async def index(
         p_uid = custom_field.split(',')[0]
         p_amount = str(custom_field.split(',')[1])
         new_amount = amount.split('.')[0]
-        log.debug(new_amount)
         if str(new_amount) != str(p_amount):
             log.debug('wrong amount')
             return JSONResponse(content = {'error': 'Incorrect payment amount'}, status_code = status.HTTP_403_FORBIDDEN)
@@ -198,14 +197,14 @@ async def index(
     """
     if str(merchant_id) == os.environ.get('ANYPAY_SHOPID'):
         if pay_status != 'paid':
-            log.debug('privilege not yes been paid')
+            log.debug('privilege not yet been paid')
             return JSONResponse(content = {'error': 'Privilege has not yet been paid'}, status_code = status.HTTP_402_PAYMENT_REQUIRED)
         server_sign = sign_md5(merchant_id, amount, pay_id, os.environ.get('ANYPAY_SECRET'))
         if server_sign != sign:
             log.debug('wrong sign')
             return JSONResponse(content = {'error': 'Wrong SIGN'}, status_code = status.HTTP_403_FORBIDDEN)
         if profit is not None:
-            commission = float(amount) - float(profit)
+            commission = round(float(amount) - float(profit), 2)
         else:
             commission = 0.0
         p_uid = field1.split(',')[0]
@@ -225,14 +224,13 @@ async def index(
 @router.post('/lava', summary = 'Callback for lava payments')
 async def index(data: LavaRequest, signature = Header(default="", alias="Authorization")):
     """Callback for lava payments"""
-    log.debug(locals())
     if signature and data:
         if data.status != 'success':
-            log.debug('privilege not yes been paid')
+            log.debug('privilege not yet been paid')
             return JSONResponse(content = {'error': 'Privilege has not yet been paid'}, status_code = status.HTTP_402_PAYMENT_REQUIRED)
-        
+
         secret2 = os.environ.get('LAVA_SECRET2')
-        server_sign = sign_hmac_sha256(sort_dict(data), secret2)
+        server_sign = sign_hmac_sha256(sort_dict(data.dict()), secret2, True)
 
         if server_sign != signature:
             log.debug('wrong sign')
@@ -248,12 +246,12 @@ async def index(data: LavaRequest, signature = Header(default="", alias="Authori
             return JSONResponse(content = {'error': 'Incorrect payment amount'}, status_code = status.HTTP_403_FORBIDDEN)
 
         if data.credited != data.amount:
-            commission = float(amount) - float(data.credited)
+            commission = round(float(amount) - float(data.credited), 2)
         else:
             commission = 0.0
         p_steam_link = data.custom_fields.split(',')[2]
         p_promo_code = data.custom_fields.split(',')[3]
-        return await give_privilege_callback('Lava', p_uid, p_steam_link, data.amount, commission, data.pay_service, p_promo_code)
+        return await give_privilege_callback('Lava', p_uid, p_steam_link, amount, commission, data.pay_service, p_promo_code)
     return JSONResponse(content = {'error': 'Request is wrong'}, status_code = status.HTTP_403_FORBIDDEN)
 
 @router.post('/paypalych', summary = 'Callback for paypalych payments')
@@ -273,7 +271,7 @@ async def index(
         SignatureValue (str): Подпись
     """
     if Status != 'SUCCESS':
-        log.debug('privilege not yes been paid')
+        log.debug('privilege not yet been paid')
         return JSONResponse(content = {'error': 'Privilege has not yet been paid'}, status_code = status.HTTP_402_PAYMENT_REQUIRED)
     server_sign = sign_md5_upper(OutSum, InvId, os.environ.get('PAYPALYCH_SECRET'))
     if server_sign != SignatureValue:
