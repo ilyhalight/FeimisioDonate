@@ -36,6 +36,13 @@ export default defineNuxtConfig({
                 name: 'English',
                 emoji: '🇬🇧',
                 file: 'en-US.yml'
+            },
+            {
+                code: 'ua',
+                iso: 'ua',
+                name: 'Український',
+                emoji: '🇺🇦',
+                file: 'ua.yml'
             }
         ], // used in URL path prefix
         defaultLocale: 'ru',   // default locale of your project for Nuxt pages and routings
