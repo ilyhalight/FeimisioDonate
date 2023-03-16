@@ -1,6 +1,8 @@
 <script setup>
   import InvisibleButton from '~/components/Buttons/InvisibleButton.vue';
-  import { useToast } from "vue-toastification";
+  import * as pkg from "vue-toastification";
+
+  const { useToast } = pkg
 
   const props = defineProps({
     text: {
