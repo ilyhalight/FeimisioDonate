@@ -59,10 +59,10 @@ async def index(steam_link: str = Form(), uid: int = Form(), selectedMethod: str
             await MassLog().info(f'[Пользователь]({steam_link}) создал ссылку на оплату **{escape_md(privilege_name)}** \(UID: **{uid}**\) за **{escape_md(price)}** руб\. \(скидка: **{escape_md(discount)}**% \| платежка: **{escape_md(aggregator)}** \| промокод: **{escape_md(promocode)}**\)')
             if 'id' in steam_link:
                 steam_arr = steam_link.split('/id/')
-                steam_arr = f'id{steam_arr[-1]}'
+                steam_arr = f'id{steam_arr[-1]}'.replace('/', '')
             elif 'profiles' in steam_link:
                 steam_arr = steam_link.split('/profiles/')
-                steam_arr = f'profiles{steam_arr[-1]}'
+                steam_arr = f'profiles{steam_arr[-1]}'.replace('/', '')
             else:
                 steam_arr = f'{steam_link}'
 
