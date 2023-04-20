@@ -18,7 +18,7 @@
     <div class="footer-links">
       <a :href="config.siteRedirectDomain">{{ $t('Main') }}</a>
       <a :href="config.siteUserAgreement">{{ $t('User agreement') }}</a>
-      <NuxtLink to="/api/redoc">API</NuxtLink>
+      <a href="/api/redoc">API</a>
     </div>
   </footer>
 </template>
