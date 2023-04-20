@@ -11,3 +11,4 @@ python-multipart>=0.0.5
 lxml>=4.9.2
 uuid>=1.30
 aiogram>=2.24
+aiofiles>=23.1.0
