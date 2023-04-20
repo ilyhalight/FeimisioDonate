@@ -4,7 +4,6 @@ from fastapi import APIRouter, Request, status, Form, Header
 from fastapi.responses import JSONResponse
 
 from models.crystalpay_request import CrystalPayRequest
-from models.lava_request import LavaRequest
 from utils.give import give_privilege_callback
 from utils.sign import sign_md5, sign_sha1, sign_hmac_sha256, sign_md5_upper
 from utils.utils import sort_dict
@@ -222,36 +221,37 @@ async def index(
     return JSONResponse(content = {'error': 'Request is wrong'}, status_code = status.HTTP_403_FORBIDDEN)
 
 @router.post('/lava', summary = 'Callback for lava payments')
-async def index(data: LavaRequest, signature = Header(default="", alias="Authorization")):
+async def index(request: Request, signature = Header(default="", alias="Authorization")):
     """Callback for lava payments"""
+    data = await request.json()
     if signature and data:
-        if data.status != 'success':
+        if data['status'] != 'success':
             log.debug('privilege not yet been paid')
             return JSONResponse(content = {'error': 'Privilege has not yet been paid'}, status_code = status.HTTP_402_PAYMENT_REQUIRED)
 
         secret2 = os.environ.get('LAVA_SECRET2')
-        server_sign = sign_hmac_sha256(sort_dict(data.dict()), secret2, True)
+        server_sign = sign_hmac_sha256(sort_dict(data), secret2, True)
 
         if server_sign != signature:
-            log.debug('wrong sign')
+            log.debug(f'WRONG SIGN! Server sign - {server_sign} | request sign - {signature} | Args: {data}')
             return JSONResponse(content = {'error': 'Wrong sign'}, status_code = status.HTTP_403_FORBIDDEN)
 
-        p_uid = data.custom_fields.split(',')[0]
-        p_amount = data.custom_fields.split(',')[1]
-        amount = data.amount
+        p_uid = data['custom_fields'].split(',')[0]
+        p_amount = data['custom_fields'].split(',')[1]
+        amount = data['amount']
         if '.' in str(amount):
             amount = str(amount).split('.')[0]
         if str(amount) != str(p_amount):
             log.debug('wrong amount')
             return JSONResponse(content = {'error': 'Incorrect payment amount'}, status_code = status.HTTP_403_FORBIDDEN)
 
-        if data.credited != data.amount:
-            commission = round(float(amount) - float(data.credited), 2)
+        if data['credited'] != data['amount']:
+            commission = round(float(amount) - float(data['credited']), 2)
         else:
             commission = 0.0
-        p_steam_link = data.custom_fields.split(',')[2]
-        p_promo_code = data.custom_fields.split(',')[3]
-        return await give_privilege_callback('Lava', p_uid, p_steam_link, amount, commission, data.pay_service, p_promo_code)
+        p_steam_link = data['custom_fields'].split(',')[2]
+        p_promo_code = data['custom_fields'].split(',')[3]
+        return await give_privilege_callback('Lava', p_uid, p_steam_link, amount, commission, data['pay_service'], p_promo_code)
     return JSONResponse(content = {'error': 'Request is wrong'}, status_code = status.HTTP_403_FORBIDDEN)
 
 @router.post('/paypalych', summary = 'Callback for paypalych payments')
@@ -259,6 +259,8 @@ async def index(
     InvId: str = Form(), OutSum: float|int = Form(), Commission: float|int = Form(), TrsId: str = Form(), Status: str = Form(),
     CurrencyIn: str = Form(), custom: str = Form(), SignatureValue: str = Form()):
     """Callback for anypay payments
+
+    # ! NOT TESTED
 
     Args:
         InvId (str): Уникальный идентификатор заказа, переданный при формировании счета
