@@ -30,7 +30,7 @@
   const currency = ref('RUB');
   const promoCode = ref('');
 
-  payID.value = getTimestamp(); 
+  payID.value = getTimestamp();
 
   uid.value = route.query.uid;
   price.value = route.query.price;
@@ -50,6 +50,7 @@
   }
 
   const field1 = `${uid.value}, ${price.value}, ${steamLink.value}, ${promoCode.value}`;
+  const signature = signMD5v2(currency.value, price.value, anypaySecret, shopID, payID.value).toString();
 
   onMounted(() => {
     let form = document.getElementById('anypay_form');
@@ -70,7 +71,7 @@
         <input type='hidden' name='desc' :value='config.donateDescription'>
         <input type='hidden' name='success_url' :value="config.siteDonateDomain+'/results/success'">
         <input type='hidden' name='fail_url' :value="config.siteDonateDomain+'/results/error'">
-        <input type='hidden' name='sign' :value='signMD5v2(currency, price, anypaySecret, shopID, payID)'>
+        <input type='hidden' name='sign' :value='signature'>
         <input type='hidden' name='field1' :value='field1'>
         <input class='button' type="submit" :value="$t('Purchase')"/>
       </form>
