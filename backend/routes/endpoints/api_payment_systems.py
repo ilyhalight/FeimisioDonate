@@ -18,7 +18,7 @@ get_payment_systems_responses = {
 
 @router.get('/payment-systems', response_class = JSONResponse, summary = 'Get payment systems', responses = get_payment_systems_responses)
 async def index(authorization: str = Header(default = '')):
-    log.debug('Getting payment systems')
+    log.debug(f'Getting payment systems (authorization header: {authorization})')
     if authorization != '' and len(authorization.split(',')) > 1:
         keys = authorization.split(',')
         key = os.environ.get('FEIMISIO_PROMOCODES_KEY')
