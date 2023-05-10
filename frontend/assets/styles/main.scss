@@ -739,3 +739,60 @@ nav[aria-label="Breadcrumb"] {
     }
   }
 }
+
+details {
+	box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+	width: 100%;
+	background: $background;
+	border-radius: 8px;
+	position: relative;
+
+	.summary-title {
+		user-select: none;
+	}
+
+	&:hover {
+		cursor: pointer;
+	}
+
+	.summary-content {
+		border-top: 1px solid $background-third;
+		cursor: default;
+		padding: 1rem;
+		font-weight: 300;
+		line-height: 1.5;
+	}
+
+	summary {
+		list-style: none;
+		padding: 1rem;
+
+		&:focus {
+			outline: none;
+		}
+
+		&:hover .summary-icon-hidden .icon {
+			opacity: 1;
+		}
+	}
+
+	.summary-icon-hidden .icon {
+		opacity: 0.5;
+	}
+
+	.summary-icon-hidden,
+	.summary-icon-opened {
+		pointer-events: none;
+		position: absolute;
+		top: 0.75em;
+		right: 1rem;
+
+		.icon {
+			display: block;
+		}
+	}
+
+	summary::-webkit-details-marker {
+		display: none;
+	}
+}
