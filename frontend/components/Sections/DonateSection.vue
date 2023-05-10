@@ -8,6 +8,7 @@
 
   const { t } = useI18n();
 
+  // TODO: Make its loading on client (edits by server)
   const donateList = await useAsyncData(async () => {
     return await getPrivileges();
   });

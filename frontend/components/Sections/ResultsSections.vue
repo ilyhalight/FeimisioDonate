@@ -24,7 +24,7 @@
       <div class="results-content">
         <div class="results-texts">
           <h3 class="title">{{ resultTitle }}</h3>
-          <p class="description">{{resultDescription}}</p>
+          <p class="description">{{ resultDescription }}</p>
         </div>
         <div class="results-buttons">
           <NuxtLink to="/support" class="button gradient">{{ $t("The privilege didn't come") }}?</NuxtLink>
