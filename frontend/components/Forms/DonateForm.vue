@@ -2,6 +2,7 @@
   import config from '~/config/config.js';
   import { checkSteamAndPromo } from '~/utils/checkSteam.js';
   import { getPaymentSystems, getBestPaymentMethods } from '~/utils/getPaymentSystems.js';
+  import Accordion from '~/components/Accordion.vue';
 
   const props = defineProps({
     selected: {
@@ -21,7 +22,7 @@
     return await getPaymentSystems();
   });
 
-  if (paymentSystems && paymentSystems.data.value.length) {
+  if (paymentSystems?.data?.value?.length) {
     bestPaymentMethods.value = getBestPaymentMethods(paymentSystems.data.value);
   }
 
@@ -37,7 +38,7 @@
           methods.splice(methods.indexOf(aggregator), 1)
           continue;
         }
-        
+
         aggregator.data = [];
         for (let i = 0; i < method.length; i++) {
           aggregator.data.push(method[i]);
@@ -77,7 +78,7 @@
 
 <template>
   <form method="post" :action="config.siteAPIDomain+ '/api/payments-methods'">
-    <div class="donate-form">
+    <div class="donate-form" v-if="bestPaymentMethods.length">
       <div class="input-box">
         <label for="steam_link" role="text">
           {{ $t('Enter the link to') }} <a class="text-gradient" href="https://steamcommunity.com/">Steam</a> {{ $t('profile') }}
@@ -121,6 +122,17 @@
       </div>
       <div class="action-btn">
         <input type="submit" id="feimisio_btn" class="button" value="Приобрести" disabled>
+      </div>
+    </div>
+    <div class="donate-form-error" v-else>
+      <div class="texts">
+        <h3 class="title error">{{ $t('API Error')+'!' }}</h3>
+        <p class="description error">{{ $t('Could not get information about available payment systems. Inform the administration about the error. Purchase is not possible.') }}</p>
+        <Accordion :title="$t('Possible solution')">
+          <template #content>
+            <p>{{ $t('Compare your time with the time on the site time.is . If your watch is more than 30 seconds behind, then you will not be able to interact with our site.') }}</p>
+          </template>
+        </Accordion>
       </div>
     </div>
   </form>
