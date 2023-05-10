@@ -50,7 +50,10 @@ Successful payment: 'Successful payment'
 Thank you for your support! Your privilege will appear to you in the near future.: 'Thank you for your support! Your privilege will appear to you in the near future.'
 The payment failed: 'The payment failed'
 Do not worry if you have made a payment and the privilege has not come to you - contact Technical support.: 'Do not worry if you have made a payment and the privilege has not come to you - contact Technical support.'
-
+Could not get information about available payment systems. Inform the administration about the error. Purchase is not possible.: 'Could not get information about available payment systems. Inform the administration about the error. Purchase is not possible.'
+API Error: 'API Error'
+Possible solution: 'Possible solution'
+Compare your time with the time on the site time.is . If your watch is more than 30 seconds behind, then you will not be able to interact with our site.: 'Compare your time with the time on the site time.is . If your watch is more than 30 seconds behind, then you will not be able to interact with our site.'
 
 # ! MY TEXTS FROM DB (REPLACE THIS WITH YOUR TEXTS)
 # * VIP

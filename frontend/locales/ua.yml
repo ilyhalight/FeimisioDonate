@@ -50,7 +50,10 @@ Successful payment: 'Успішна оплата'
 Thank you for your support! Your privilege will appear to you in the near future.: "Дякую за вашу підтримку! Ваша привілей з'явиться у вас найближчим часом."
 The payment failed: 'Платіж не вдався'
 Do not worry if you have made a payment and the privilege has not come to you - contact Technical support.: 'Не хвилюйтеся, якщо ви здійснили оплату і привілей вам не прийшла - зверніться в тих. підтримку.'
-
+Could not get information about available payment systems. Inform the administration about the error. Purchase is not possible.: 'Не вдалося отримати інформацію про доступні платіжні системи. Повідомте адміністрації про помилку. Покупка неможлива.'
+API Error: 'Помилка API'
+Possible solution: 'Можливе рішення'
+Compare your time with the time on the site time.is . If your watch is more than 30 seconds behind, then you will not be able to interact with our site.: 'Порівняйте свій час із часом на сайті time.is. якщо ваш годинник відстає більш ніж на 30 секунд, то ви не зможете взаємодіяти з нашим сайтом.'
 
 # ! MY TEXTS FROM DB (REPLACE THIS WITH YOUR TEXTS)
 # * VIP
