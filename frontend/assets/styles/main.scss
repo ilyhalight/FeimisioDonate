@@ -511,6 +511,17 @@ a.text-gradient:hover {
       &[aria-checked="true"] {
         outline: 2px solid $primary;
       }
+      .tags {
+        position: absolute;
+        background: transparent;
+        margin-top: 65px;
+        margin-left: 0;
+        .tag {
+          margin: 0;
+          font-size: 0.85rem;
+          line-height: 0.85rem;
+        }
+      }
     }
   }
 }
