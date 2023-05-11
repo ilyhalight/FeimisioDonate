@@ -18,6 +18,15 @@
   const bestPaymentMethods = ref([]);
   const selectedMethod = ref('');
 
+  const colorByAggregators = {
+    lava: '#f1454e',
+    enot: '#fbcd02',
+    anypay: '#ffbb13',
+    freekassa: '#fa5745',
+    paypalych: '#1e7f94',
+    crystalpay: '#4ad2ff',
+  }
+
   const paymentSystems = await useAsyncData(async () => {
     return await getPaymentSystems();
   });
@@ -113,6 +122,9 @@
           <template v-if="selected.price != 0 && availableMethods.length"> 
             <div v-for="paymentMethod of availableMethods" :key="paymentMethod.method" :aria-roledescription="paymentMethod.data[0].name" class="payment-system" :id="paymentMethod.method" @click="selectedMethod = `${paymentMethod.data[0].name};${paymentMethod.method}`" :aria-checked="paymentMethod.method === selectedMethod.split(';')[1] ? 'true' : 'false'">
               <nuxt-img :src="`/images/methods/${paymentMethod.method}.svg`" :alt="paymentMethod.method" width="100" height="48"/>
+              <div class="tags">
+                <div class="tag" :style="`color:${colorByAggregators[paymentMethod.data[0].name]};opacity:0.85;`">{{ paymentMethod.data[0].name }}</div>
+              </div>
             </div>
           </template>
         </div>
