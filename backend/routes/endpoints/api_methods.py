@@ -1,3 +1,4 @@
+import json
 import time
 import uuid
 import aiohttp
@@ -14,6 +15,7 @@ from utils.price import get_final_price
 from utils.give import give_privilege_callback
 from utils.sign import sign_hmac_sha256
 from utils.utils import sort_dict
+from utils.converters import SteamConverters
 
 router = APIRouter()
 log = logging.getLogger('server')
@@ -56,7 +58,12 @@ async def index(steam_link: str = Form(), uid: int = Form(), selectedMethod: str
         else:
             return JSONResponse(content = {'error': 'Not valid uid'}, status_code = status.HTTP_404_NOT_FOUND)
         if price > 0:
-            await MassLog().info(f'[Пользователь]({steam_link}) создал ссылку на оплату **{escape_md(privilege_name)}** \(UID: **{uid}**\) за **{escape_md(price)}** руб\. \(скидка: **{escape_md(discount)}**% \| платежка: **{escape_md(aggregator)}** \| промокод: **{escape_md(promocode)}**\)')
+            nickname = 'Пользователь'
+            try:
+                nickname = SteamConverters().url_to_nickname(steam_link)
+            except Exception as err:
+                log.error(f'Failed get username from Steam: {err}')
+            await MassLog().info(f'[{escape_md(nickname)}]({steam_link}) создал ссылку на оплату **{escape_md(privilege_name)}** \(UID: **{uid}**\) за **{escape_md(price)}** руб\. \(скидка: **{escape_md(discount)}**% \| платежка: **{escape_md(aggregator)}** \| промокод: **{escape_md(promocode)}**\)')
             if 'id' in steam_link:
                 steam_arr = steam_link.split('/id/')
                 steam_arr = f'id{steam_arr[-1]}'.replace('/', '')
@@ -110,7 +117,7 @@ async def index(steam_link: str = Form(), uid: int = Form(), selectedMethod: str
 
                     data_json = sort_dict(data_json)
                     sign = sign_hmac_sha256(data_json, secret)
-                    
+
                     async with aiohttp.ClientSession() as session:
                         async with session.post('https://api.lava.ru/business/invoice/create',
                             json = data_json,
@@ -124,6 +131,50 @@ async def index(steam_link: str = Form(), uid: int = Form(), selectedMethod: str
                             if data and data['status_check'] == True and data['data'] is not None:
                                 return RedirectResponse(url = data['data']['url'], status_code = status.HTTP_303_SEE_OTHER)
                             await MassLog().error(f'Ошибка при создании ссылки на оплату через **Lava**: {escape_md(str(data))}')
+                            return JSONResponse(content = {'error': 'Server error'}, status_code = status.HTTP_500_INTERNAL_SERVER_ERROR)
+                case 'enot':
+                    shopid = os.environ.get('ENOT_SHOPID')
+                    secret = os.environ.get('ENOT_SECRET')
+                    currency = 'RUB'
+                    if aggregator == 'another_cards':
+                        currency = 'USD'
+
+                    custom_fields = {
+                        "uid": uid,
+                        "price": price,
+                        "steam_arr": steam_arr,
+                        "promocode": promocode
+                    }
+
+                    custom_fields_json = json.dumps(custom_fields)
+
+                    data_json = {
+                        'amount': price,
+                        'order_id': uuid.uuid4().hex,
+                        'currency': currency,
+                        'shop_id': shopid,
+                        'hook_url': f'{server_config["site_api_domain"]}/api/callback/enot',
+                        'custom_fields': custom_fields_json,
+                        'comment': server_config['donate_description'],
+                        'fail_url': f'{server_config["site_donate_domain"]}/results/error',
+                        'success_url': f'{server_config["site_donate_domain"]}/results/success',
+                        'expire': 300,
+                    }
+
+                    async with aiohttp.ClientSession() as session:
+                        async with session.post('https://api.enot.io/invoice/create',
+                            json = data_json,
+                            headers = {
+                                'X-Api-Key': secret,
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json'
+                            }
+                        ) as resp:
+                            data = await resp.json(content_type=None)
+                            log.debug(f"Data from Enot: {data}")
+                            if data and data['status_check'] == True and data['data']['url'] != '':
+                                return RedirectResponse(url = data['data']['url'], status_code = status.HTTP_303_SEE_OTHER)
+                            await MassLog().error(f'Ошибка при создании ссылки на оплату через **Enot**: {escape_md(str(data))}')
                             return JSONResponse(content = {'error': 'Server error'}, status_code = status.HTTP_500_INTERNAL_SERVER_ERROR)
                 case 'paypalych':
                     secret = os.environ.get('PAYPALYCH_SECRET')

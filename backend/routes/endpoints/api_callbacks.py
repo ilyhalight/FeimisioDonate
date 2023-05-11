@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 from fastapi import APIRouter, Request, status, Form, Header
@@ -7,6 +8,8 @@ from models.crystalpay_request import CrystalPayRequest
 from utils.give import give_privilege_callback
 from utils.sign import sign_md5, sign_sha1, sign_hmac_sha256, sign_md5_upper
 from utils.utils import sort_dict
+from logger.masslog import MassLog
+from aiogram.utils.markdown import escape_md
 
 router = APIRouter()
 log = logging.getLogger('server')
@@ -130,44 +133,44 @@ async def index(data: CrystalPayRequest):
     return JSONResponse(content = {'error': 'Request is wrong'}, status_code = status.HTTP_403_FORBIDDEN)
 
 @router.post('/enot', summary = 'Callback for enot payments')
-async def index(
-    merchant: str = Form(), amount: str = Form(), credited: str = Form(),
-    intid: str = Form(), merchant_id: str = Form(), method: str = Form(), sign: str = Form(),
-    sign_2: str = Form(), currency: str = Form(), payer_details: str = Form(default=""),
-    commission: float = Form(), commission_pay: str = Form(), custom_field: str = Form()):
-    """Callback for enot payments
+async def index(request: Request, signature = Header(default="", alias="x-api-sha256-signature")):
+    """Callback for enot payments"""
+    data = await request.json()
+    if signature and data:
+        if data['status'] != 'success':
+            log.debug('privilege not yet been paid')
+            return JSONResponse(content = {'error': 'Privilege has not yet been paid'}, status_code = status.HTTP_402_PAYMENT_REQUIRED)
 
-    Args:
-        merchant (str): ID вашего магазина  
-        amount (float): Сумма заказа
-        credited (float): Сумма зачисленная вам на баланс (В рублях)
-        intid (int): ID операции в нашей системе
-        merchant_id (str): ID операции в вашей системе
-        sign (str): Ключ, который вы генерировали до оплаты заказа
-        sign_2 (str): Ключ, который сгенерирован, как SIGN, но с секретным ключом №2. Всегда проверяйте данный ключ!
-        currency (str): Валюта платежа (RUB, USD, EUR, UAH) (Зависит от валюты магазина. По умолчанию RUB)
-        payer_details (str): Реквизиты плательщика (Может быть пустым)
-        commission (float): Сумма комиссии при заказе (Зависит от валюты платежа. По умолчанию RUB)
-        commission_pay (str): Кто платит комиссию (shop - магазин, client - клиент, 50/50 - 50 на 50)
-        custom_field (list|dict|tuple): Строка или массив который вы передавали в параметр "cf"
-    """
-    if str(merchant) == os.environ.get('ENOT_SHOPID'):
-        server_sign_2 = sign_md5(merchant, amount, os.environ.get('ENOT_SECRET2'), merchant_id)
-        if server_sign_2 != sign_2:
-            log.debug('wrong sign 2 ')
-            return JSONResponse(content = {'error': 'Wrong SIGN'}, status_code = status.HTTP_403_FORBIDDEN)
-        log.debug('SIGN 2 is valid')
-        p_uid = custom_field.split(',')[0]
-        p_amount = str(custom_field.split(',')[1])
-        new_amount = amount.split('.')[0]
-        if str(new_amount) != str(p_amount):
+        secret2 = os.environ.get('ENOT_SECRET2')
+        server_sign = sign_hmac_sha256(sort_dict(data), secret2, True)
+
+        if server_sign != signature:
+            log.debug(f'WRONG SIGN! Server sign - {server_sign} | request sign - {signature} | Args: {data}')
+            return JSONResponse(content = {'error': 'Wrong sign'}, status_code = status.HTTP_403_FORBIDDEN)
+
+        custom_fields = json.loads(data['custom_fields'])
+        p_uid = custom_fields['uid']
+        p_amount = custom_fields['amount']
+        p_steam_link = custom_fields['steam_arr']
+        p_promo_code = custom_fields['promocode']
+
+        amount = data['amount']
+        if '.' in str(amount):
+            amount = str(amount).split('.')[0]
+        if str(amount) != str(p_amount):
             log.debug('wrong amount')
             return JSONResponse(content = {'error': 'Incorrect payment amount'}, status_code = status.HTTP_403_FORBIDDEN)
-        p_steam_link = custom_field.split(',')[2]
-        p_promo_code = custom_field.split(',')[3]  
-        
-        return await give_privilege_callback('Enot.io', p_uid, p_steam_link, new_amount, commission, method, p_promo_code)
-    log.debug('request is wrong')
+
+        if data['type'] == 2:
+            log.error(f'WARN! Payment refunded by {data["custom_fields"]}!!!')
+            await MassLog().warn(f'Payment refunded by {escape_md(data["custom_fields"])}!!!\n\nFull webhook data: {escape_md(data)}')
+            return JSONResponse(content = {'error': 'Payment refunded'}, status_code = status.HTTP_403_FORBIDDEN)
+
+        if data['credited'] != data['amount']:
+            commission = round(float(amount) - float(data['credited']), 2)
+        else:
+            commission = 0.0
+        return await give_privilege_callback('Enot.io', p_uid, p_steam_link, amount, commission, data['pay_service'], p_promo_code)
     return JSONResponse(content = {'error': 'Request is wrong'}, status_code = status.HTTP_403_FORBIDDEN)
 
 @router.post('/anypay', summary = 'Callback for anypay payments')
