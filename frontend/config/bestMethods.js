@@ -8,7 +8,7 @@ const bestAggregators = () => {
                 {
                     name: 'enot',
                     minPrice: undefined,
-                    commission: undefined,
+                    commission: 3.5,
                     disabled: true
                 },
                 {
@@ -37,7 +37,7 @@ const bestAggregators = () => {
                 {
                     name: 'enot',
                     minPrice: 100,
-                    commission: 6.0,
+                    commission: 3.0,
                     disabled: false
                 },
                 {
@@ -78,7 +78,7 @@ const bestAggregators = () => {
                 {
                     name: 'enot',
                     minPrice: 10,
-                    commission: 6.0,
+                    commission: 3.0,
                     disabled: false
                 },
                 {
@@ -101,7 +101,7 @@ const bestAggregators = () => {
                 {
                     name: 'enot',
                     minPrice: 10,
-                    commission: 10.0,
+                    commission: 5.0,
                     disabled: false
                 },
                 {
@@ -124,7 +124,7 @@ const bestAggregators = () => {
                 {
                     name: 'enot',
                     minPrice: 10,
-                    commission: 5.0,
+                    commission: 2.5,
                     disabled: false
                 },
                 {
@@ -301,8 +301,8 @@ const bestAggregators = () => {
             data: [
                 {
                     name: 'enot',
-                    minPrice: 100,
-                    commission: 5.0,
+                    minPrice: 10,
+                    commission: 2.0,
                     disabled: false
                 },
             ]
