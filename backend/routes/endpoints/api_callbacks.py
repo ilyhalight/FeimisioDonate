@@ -148,11 +148,10 @@ async def index(request: Request, signature = Header(default="", alias="x-api-sh
             log.debug(f'WRONG SIGN! Server sign - {server_sign} | request sign - {signature} | Args: {data}')
             return JSONResponse(content = {'error': 'Wrong sign'}, status_code = status.HTTP_403_FORBIDDEN)
 
-        custom_fields = json.loads(data['custom_fields'])
-        p_uid = custom_fields['uid']
-        p_amount = custom_fields['amount']
-        p_steam_link = custom_fields['steam_arr']
-        p_promo_code = custom_fields['promocode']
+        p_uid = data['custom_fields']['uid']
+        p_amount = data['custom_fields']['price']
+        p_steam_link = data['custom_fields']['steam_arr']
+        p_promo_code = data['custom_fields']['promocode']
 
         amount = data['amount']
         if '.' in str(amount):
