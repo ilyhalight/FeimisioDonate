@@ -47,14 +47,19 @@ async def give_privilege_callback(aggregator: str, p_uid: int, p_steam_link: str
             steam_link = p_steam_link
         
         price_privilege = await get_final_price(privileges['price'], privileges['discount'], p_promo_code)
+        nickname = 'Пользователь'
+        try:
+            nickname = SteamConverters().url_to_nickname(steam_link)
+        except Exception as err:
+            log.error(f'Failed get username from Steam: {err}')
         if int(price_privilege) != int(amount):
-            await MassLog().error(f'[Пользователь]({steam_link}) оплатил привилегию **{escape_md(privileges["name"])}** \(UID: **{p_uid}**\) за **{escape_md(amount)}** руб\. \(комиссия: **{escape_md(commission)}**\, настоящая цена: **{escape_md(price_privilege)}**\) через **{escape_md(aggregator)}** \(Метод: **{escape_md(method)}** \| Промокод: **{escape_md(p_promo_code)}**\)\n\n**ОШИБКА:** Не совпадает сумма платежа и цена привилегии!!!')
+            await MassLog().error(f'[{escape_md(nickname)}]({steam_link}) оплатил привилегию **{escape_md(privileges["name"])}** \(UID: **{p_uid}**\) за **{escape_md(amount)}** руб\. \(комиссия: **{escape_md(commission)}**\, настоящая цена: **{escape_md(price_privilege)}**\) через **{escape_md(aggregator)}** \(Метод: **{escape_md(method)}** \| Промокод: **{escape_md(p_promo_code)}**\)\n\n**ОШИБКА:** Не совпадает сумма платежа и цена привилегии!!!')
             return JSONResponse(content = {'auth': 'OK', 'status': 'error', 'message': 'Не совпадает сумма платежа и цена привилегии!'}, status_code = status.HTTP_402_PAYMENT_REQUIRED)
 
         if int(amount) != 0:
-            await MassLog().success(f'[Пользователь]({steam_link}) оплатил привилегию **{escape_md(privileges["name"])}** \(UID: **{p_uid}**\) за **{escape_md(amount)}** руб\. \(комиссия: **{escape_md(commission)}**\) через **{escape_md(aggregator)}** \(Метод: **{escape_md(method)}** \| Промокод: **{escape_md(p_promo_code)}**\)')
+            await MassLog().success(f'[{escape_md(nickname)}]({steam_link}) оплатил привилегию **{escape_md(privileges["name"])}** \(UID: **{p_uid}**\) за **{escape_md(amount)}** руб\. \(комиссия: **{escape_md(commission)}**\) через **{escape_md(aggregator)}** \(Метод: **{escape_md(method)}** \| Промокод: **{escape_md(p_promo_code)}**\)')
         else:
-            await MassLog().info(f'[Пользователь]({steam_link}) запросил бесплатную привилегию {escape_md(privileges["name"])} \(промокод: {escape_md(p_promo_code)}\)')
+            await MassLog().info(f'[{escape_md(nickname)}]({steam_link}) запросил бесплатную привилегию {escape_md(privileges["name"])} \(промокод: {escape_md(p_promo_code)}\)')
         res = await giver_csgo(p_uid, steam_link)
         steamid64 = SteamConverters().url_to_steam64(steam_link)
         steamid = SteamConverters().to_steamID(steamid64)
@@ -64,7 +69,7 @@ async def give_privilege_callback(aggregator: str, p_uid: int, p_steam_link: str
                 await DbPromocodeUsesController().add(p_promo_code, steamid, p_uid, int(time.time()))
                 log.info(f'Added promocode {p_promo_code} usages to Database')
             except Exception:
-                await MassLog().success(f'Произошла ошибка при добавление использования промокода {escape_md(p_promo_code)} в Базу Данных\. \([Пользователь]({steam_link})**, привилегия: {escape_md(privileges["name"])}** \({p_uid}\), цена: **{escape_md(amount)}** руб\. \(комиссия: **{escape_md(commission)}**) через **{escape_md(aggregator)}** \(Метод: **{escape_md(method)}**\)')
+                await MassLog().success(f'Произошла ошибка при добавление использования промокода {escape_md(p_promo_code)} в Базу Данных\. \([{escape_md(nickname)}]({steam_link})**, привилегия: {escape_md(privileges["name"])}** \({p_uid}\), цена: **{escape_md(amount)}** руб\. \(комиссия: **{escape_md(commission)}**) через **{escape_md(aggregator)}** \(Метод: **{escape_md(method)}**\)')
                 log.exception('Error while adding usage to promo')
         if res:
             if amount != 0:
@@ -137,18 +142,24 @@ async def give_on_csgo_server(steamid: int, name: str, group: str, seconds: int)
                     expires = int(time.time()) + seconds
                     date = datetime.fromtimestamp(expires).strftime('%d.%m.%Y %H:%M')
                 account_id = SteamConverters().to_steamID3(steamid)
+                nickname = 'Пользователь'
+                steam_link = f'https://steamcommunity.com/profiles/{account_id}'
+                try:
+                    nickname = SteamConverters().url_to_nickname(steam_link)
+                except Exception as err:
+                    log.error(f'Failed get username from Steam: {err}')
                 for g in groups:
                     if g['name'] == group and g['gid'] > 0 and g['srv_group'] != '':
                         password = uuid.uuid4()
                         await SBAdminsController().add(name, steamid, password, g['admin'], name, g['srv_group'], expires) 
                         return {
                             'status': 'success',
-                            'logs': f'Привилегия {escape_md(group)} была успешно выдана [игроку](https://steamcommunity.com/profiles/{account_id})\.\nПривилегия действует до **{escape_md(date)}**\.',
-                            'web': f'Привилегия {group} была успешно выдана.\n\nВаша привилегия действует до {escape_md(date)}. Ваш пароль для входа в админку: **{password}** (не забудьте его сохранить). Если привилегия не появилась, вам необходимо перезайти на сервер.'
+                            'logs': f'Привилегия {escape_md(group)} была успешно выдана [{escape_md(nickname)}]({steam_link})\.\nПривилегия действует до **{escape_md(date)}**\.',
+                            'web': f'Привилегия {group} была успешно выдана\n\nВаша привилегия действует до {escape_md(date)}. Ваш пароль для входа в админку: **{password}** (не забудьте его сохранить). Если привилегия не появилась, вам необходимо перезайти на сервер.'
                         }
                 return {
                     'status': 'success',
-                    'logs': f'Привилегия {escape_md(group)} была успешно выдана [игроку](https://steamcommunity.com/profiles/{account_id})\.\nПривилегия действует до **{escape_md(date)}**\.\n\nПривилегия выдана на сервере {escape_md(server["ip"])}\:{server["port"]}',
+                    'logs': f'Привилегия {escape_md(group)} была успешно выдана [{escape_md(nickname)}]({steam_link})\.\nПривилегия действует до **{escape_md(date)}**\.\n\nПривилегия выдана на сервере {escape_md(server["ip"])}\:{server["port"]}',
                     'web': f'Привилегия {group} была успешно выдана.\n\nВаша привилегия действует до {escape_md(date)}.'
                 }
     return False
@@ -158,6 +169,13 @@ async def give_csgo_database(account_id: int, name: str, group: str, expires: in
     account_id = account_id.split('[U:1:')[-1].split(']')[0]
     current = await VipUsersController().get(account_id)
     groups = load_json('groups.json')['csgo']
+
+    nickname = 'Пользователь'
+    steam_link = f'https://steamcommunity.com/profiles/[U:1:{account_id}]'
+    try:
+        nickname = SteamConverters().url_to_nickname(steam_link)
+    except Exception as err:
+        log.error(f'Failed get username from Steam: {err}')
     if current and len(current) > 0:
         сurrent_group = current['group']
         current_expires = current['expires']
@@ -171,34 +189,34 @@ async def give_csgo_database(account_id: int, name: str, group: str, expires: in
         if current_group_level == -1 and group_level == -1:
             return {
                 'status': 'error',
-                'logs': f'[Пользователь](https://steamcommunity.com/profiles/[U:1:{account_id}]) попытался выдать неизвестную привилегию {escape_md(group)}\!',
+                'logs': f'[{escape_md(nickname)}]({steam_link}) попытался выдать неизвестную привилегию {escape_md(group)}\!',
                 'web': 'Неизвестная привилегия'
             }
         elif current_group_level == -1 and group_level != -1:
             return {
                 'status': 'error',
-                'logs': f'[Пользователь](https://steamcommunity.com/profiles/[U:1:{account_id}]) имеет уникальную привилегию не указанную в конфиге\!',
+                'logs': f'[{escape_md(nickname)}]({steam_link}) имеет уникальную привилегию не указанную в конфиге\!',
                 'web': 'Неизвестная привилегия'
             }
         elif current_group_level != -1 and group_level == -1:
             return {
                 'status': 'error',
-                'logs': f'[Пользователь](https://steamcommunity.com/profiles/[U:1:{account_id}]) пытается получить привилегию, которой нету в конфиге\!',
+                'logs': f'[{escape_md(nickname)}]({steam_link}) пытается получить привилегию, которой нету в конфиге\!',
                 'web': 'Неизвестная привилегия'
             }
         elif current_group_level < group_level:
             await VipUsersController().remove(current['account_id'])
-            await MassLog().info(f'Привилегия **{escape_md(сurrent_group)}** была удалена у [игрока](https://steamcommunity.com/profiles/[U:1:{account_id}]) для выдачи новой привилегии с более высоким приоритетом\.')
+            await MassLog().info(f'Привилегия **{escape_md(сurrent_group)}** была удалена у [{escape_md(nickname)}]({steam_link}) для выдачи новой привилегии с более высоким приоритетом\.')
         elif current_group_level == group_level and current_expires != 0 and current_expires < expires:
             await VipUsersController().remove(current['account_id'])
-            await MassLog().info(f'Привилегия **{escape_md(group)}** была удалена у [игрока](https://steamcommunity.com/profiles/[U:1:{account_id}]) для выдачи новой привилегии с более длинным сроком действия\.')
+            await MassLog().info(f'Привилегия **{escape_md(group)}** была удалена у [{escape_md(nickname)}]({steam_link}) для выдачи новой привилегии с более длинным сроком действия\.')
         elif current_group_level == group_level and current_expires != 0 and expires == 0:
             await VipUsersController().remove(current['account_id'])
-            await MassLog().info(f'Привилегия **{escape_md(group)}** была удалена у [игрока](https://steamcommunity.com/profiles/[U:1:{account_id}]) для выдачи новой привилегии с бесконечным сроком действия\.')
+            await MassLog().info(f'Привилегия **{escape_md(group)}** была удалена у [{escape_md(nickname)}]({steam_link}) для выдачи новой привилегии с бесконечным сроком действия\.')
         else:
             return {
                 'status': 'error',
-                'logs': f'Привилегия **{escape_md(group)}** не была выдана [игроку](https://steamcommunity.com/profiles/[U:1:{account_id}])\.\nУ игрока уже есть привилегия выше или равная этой\.',
+                'logs': f'Привилегия **{escape_md(group)}** не была выдана [{escape_md(nickname)}]({steam_link})\.\nУ игрока уже есть привилегия выше или равная этой\.',
                 'web': 'У вас уже есть привилегия выше или равная этой. Если вы всё равно хотите получить эту привилегию - отпишите по контактам внизу страницы.'
             }
     status = await VipUsersController().add(account_id, name, group, expires)
@@ -214,16 +232,16 @@ async def give_csgo_database(account_id: int, name: str, group: str, expires: in
                 await SBAdminsController().add(name, steamid, password, g['gid'], name, g['srv_group'], expires) 
                 return {
                     'status': 'success',
-                    'logs': f'Привилегия **{escape_md(group)}** была успешно выдана [игроку](https://steamcommunity.com/profiles/[U:1:{account_id}])\.\nПривилегия действует **{str_expires}**\.',
+                    'logs': f'Привилегия **{escape_md(group)}** была успешно выдана [{escape_md(nickname)}]({steam_link})\.\nПривилегия действует **{str_expires}**\.',
                     'web': f'Привилегия {group} была успешно выдана.\n\nВаша привилегия действует {str_expires}. Ваш пароль для входа в админку: **{password}** (не забудьте его сохранить). Если привилегия не появилась, вам необходимо перезайти на сервер.'
                 }
         return {
             'status': 'success',
-            'logs': f'Привилегия **{escape_md(group)}** была успешно выдана [игроку](https://steamcommunity.com/profiles/[U:1:{account_id}])\.\nПривилегия действует **{str_expires}**\.',
+            'logs': f'Привилегия **{escape_md(group)}** была успешно выдана [{escape_md(nickname)}]({steam_link})\.\nПривилегия действует **{str_expires}**\.',
             'web': f'Привилегия {group} была успешно выдана.\n\nВаша привилегия действует {str_expires}. Если привилегия не появилась, вам необходимо перезайти на сервер.'
         }
     return {
         'status': 'error',
-        'logs': f'Привилегия **{escape_md(group)}** не была выдана [игроку](https://steamcommunity.com/profiles/[U:1:{account_id}])\.\nВозникла проблема при добавление привилегии в базу данных\.',
+        'logs': f'Привилегия **{escape_md(group)}** не была выдана [{escape_md(nickname)}]({steam_link})\.\nВозникла проблема при добавление привилегии в базу данных\.',
         'web': 'Возникла проблема при добавление привилегии в базу данных. Отпишите по контактам внизу страницы.'
     }
