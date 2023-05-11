@@ -1,8 +1,6 @@
 <script setup>
 import InvisibleButton from '~/components/Buttons/InvisibleButton.vue';
 
-const { locale, locales, setLocale } = useI18n();
-
 const colorModes = {
   system: {
     code: 'system',
