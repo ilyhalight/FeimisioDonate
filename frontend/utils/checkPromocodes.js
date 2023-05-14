@@ -15,7 +15,8 @@ async function checkPromoCodes(promoCode, privilegeUID) {
     query: {
       privilege: privilegeUID,
       promo: promoCode
-    }
+    },
+    server: false,
   });
 };
 

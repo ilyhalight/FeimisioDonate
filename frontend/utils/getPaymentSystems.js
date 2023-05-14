@@ -11,7 +11,8 @@ async function getPaymentSystems() {
     parseResponse: JSON.parse,
     headers: {
       'Authorization': `${timestamp},${token}`
-    }
+    },
+    server: false
   });
 };
 
