@@ -35,7 +35,7 @@ async def index(authorization: str = Header(default = '')):
     log.debug('Getting promocodes')
     if authorization != '' and len(authorization.split(',')) > 1:
         keys = authorization.split(',')
-        key = os.environ.get('FEIMISIO_PROMOCODES_KEY')
+        key = os.environ.get('FEIMISIO_PROMOCODES_ADMIN_KEY')
         timestamp = int(keys[0])
         token = keys[1]
         is_valid = await validate_token(token, key, timestamp)
@@ -91,6 +91,15 @@ async def index(privilege: int, promo: str = '', authorization: str = Header(def
                             'data': {
                                 'status': False,
                                 'msg': 'Privilege not found'
+                            }
+                        }, status_code = status.HTTP_200_OK)
+
+                    if promocode['expires'] == 1:
+                        return JSONResponse(content = {
+                            'error': 'The promocode has expired',
+                            'data': {
+                                'status': False,
+                                'msg': 'The promocode has expired'
                             }
                         }, status_code = status.HTTP_200_OK)
 
