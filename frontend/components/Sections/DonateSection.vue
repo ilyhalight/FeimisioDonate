@@ -48,13 +48,17 @@
           :style="((donate.image && donate.image.length) ? '' : 'padding:56px;')+(donate.bg_color ? `background:${donate.bg_color}` : '')"
         >
         <div class="tags">
-          <div class="tag" v-html="normalizeDuration(donate.duration, t)"></div>
+          <ClientOnly>
+            <div class="tag" v-html="normalizeDuration(donate.duration, t)"></div>
+          </ClientOnly>
         </div>
       </div>
       <figcaption>
         <div class="card-title title">
           <h3>{{ donate.name }}</h3>
-          <h3 v-html="getFinalPrice(donate.price, donate.discount, t)"></h3>
+          <ClientOnly>
+            <h3 v-html="getFinalPrice(donate.price, donate.discount, t)"></h3>
+          </ClientOnly>
         </div>
         <p>{{ $t(donate.short_description) }}</p>
         <NuxtLink :bind="donate.link" :to="'/info/'+donate.link" target="_blank">{{ $t('Detailed') }}...</NuxtLink>
