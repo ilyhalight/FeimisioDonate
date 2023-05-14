@@ -512,14 +512,19 @@ a.text-gradient:hover {
         outline: 2px solid $primary;
       }
       .tags {
-        position: absolute;
-        background: transparent;
-        margin-top: 65px;
-        margin-left: 0;
-        .tag {
-          margin: 0;
-          font-size: 0.85rem;
-          line-height: 0.85rem;
+        @media screen and (min-width: 1280px) {
+          position: absolute;
+          background: transparent;
+          margin-top: 65px;
+          margin-left: 0;
+          .tag {
+            margin: 0;
+            font-size: 0.85rem;
+            line-height: 0.85rem;
+          }
+        }
+        @media screen and (max-width: 1280px) {
+          display: none;
         }
       }
     }
