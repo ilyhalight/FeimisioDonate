@@ -25,6 +25,7 @@ Promocode uses limit reached: 'Promocode uses limit reached'
 Promocode can't be applied to this privilege: "Promocode can't be applied to this privilege"
 Privilege not found: 'Privilege not found'
 The list of promo codes was not found: 'The list of promo codes was not found'
+The promocode has expired: 'The promocode has expired'
 Discount: 'Discount'
 d: 'd'
 hour: 'hour'
@@ -57,13 +58,13 @@ Compare your time with the time on the site time.is . If your watch is more than
 
 # ! MY TEXTS FROM DB (REPLACE THIS WITH YOUR TEXTS)
 # * VIP
-Эксклюзивные скины, доступ к смене скайбоксов, х1.2 рейты и многое другое: 'Exclusive skins, access to changing skyboxes, x1.2 rates and much more'
+Эксклюзивные скины, доступ к смене скайбоксов, х1.25 рейты и многое другое: 'Exclusive skins, access to changing skyboxes, x1.25 rates and much more'
 Префиксы: 'Prefixes'
 Обладатели VIP-статуса имеют доступ к нескольким префиксам на выбор: 'VIP status holders have access to several prefixes to choose from'
 Неон: 'Neon'
 Обладатели VIP-статуса имеют доступ к неоновой подсветке под персонажем: 'VIP status holders have access to neon lighting under the character'
 Бонусы: 'Bonuses'
-Обладатели VIP-статуса получают в 1.2 раза больше опыта и кредитов. Так же у них действует 5% скидка в /shop: 'VIP status holders receive 1.2 times more experience and credits. They also have a 5% discount in /shop'
+Обладатели VIP-статуса получают в 1.25 раза больше опыта и кредитов. Так же у них действует 5% скидка в /shop: 'VIP status holders receive 1.25 times more experience and credits. They also have a 5% discount in /shop'
 Трассеры: 'Tracers'
 Обладатели VIP-статуса имеют доступ к трассерам от пуль: 'VIP status holders have access to bullet tracers'
 Эффект при смерти: 'Effect at death'
@@ -78,6 +79,10 @@ Compare your time with the time on the site time.is . If your watch is more than
 'Обладатели VIP-статуса имеют эксклюзивные скины, доступные только донатерам: Maverick и MOTOKO': 'VIP status holders have exclusive skins available only to donators: Maverick and MOTOKO'
 20+ кастомных скайбоксов: '20+ custom skyboxes'
 Обладатели VIP-статуса или более высокой привилегии, есть доступ к смене скайбокса. На данный момент, можно выбрать среди более 20-и скайбоксов: 'Holders of VIP status or a higher privilege have access to changing the skybox. At the moment, you can choose among more than 20 skyboxes'
+Хитмаркер: 'Hitmarker'
+Обладатели VIP-статуса или более высокой привилегии имеют доступ к хитмаркеру, показывающему крестик при попадание в противниках: 'Holders of VIP status or a higher privilege have access to a hitmarker that shows a cross when hitting opponents'
+Колесо чата: 'Chat Wheel'
+Обладатели VIP-статуса или более высокой привилегии имеют доступ к колесу чата: 'Holders of VIP status or higher privilege have access to the chat wheel'
 
 # * Premium
 Доступ к кастомным скинам, нет урона от падения, х1.5 рейты и многое другое: 'Access to a custom skin, no drop damage, x1.5 rates and much more'
@@ -101,7 +106,7 @@ Compare your time with the time on the site time.is . If your watch is more than
 'Обладатели Премиум-статуса имеют эксклюзивные скины, доступные только донатерам: Путин, "Художник", Zero Two, Канеки Кен': 'Premium status holders have exclusive skins available only to donators: Putin, "The Artist", Zero Two, Kaneki Ken'
 
 # * Deluxe
-Доступ ко всем кастомным скинам, доступ к хилке, х1.65 рейты и многое другое: 'Access to all custom skins, access to hilka, x1.65 rates and much more'
+Доступ ко всем кастомным скинам, доступ к хилке, х1.75 рейты и многое другое: 'Access to all custom skins, access to hilka, x1.75 rates and much more'
 Аура 2.0: 'Aura 2.0'
 Обладатели Делюкс-статуса или более высокой привилегии имеют доступ к Ауре 2.0: 'Deluxe status holders or higher privilege have access to Aura 2.0'
 Обладатели Делюкс-статуса имеют доступ к нескольким префиксам на выбор: 'Deluxe status holders have access to several prefixes to choose from'
@@ -109,7 +114,7 @@ Compare your time with the time on the site time.is . If your watch is more than
 Обладатели Делюкс-статуса или более высокой привилегии имеют доступ к мед. шприцу: 'Holders of Deluxe status or a higher privilege have access to med. the syringe'
 Медали: 'Medals'
 Обладатели Делюкс-статуса или более высокой привилегии имеют доступ к медалям: 'Holders of Deluxe status or higher privilege have access to medals'
-Обладатели Премиум-статуса получают в 1.65 раза больше опыта и кредитов. Так же у них действует 15% скидка в /shop: 'Premium status holders receive 1.65 times more experience and credits. They also have a 15% discount in /shop'
+Обладатели Премиум-статуса получают в 1.75 раза больше опыта и кредитов. Так же у них действует 15% скидка в /shop: 'Premium status holders receive 1.75 times more experience and credits. They also have a 15% discount in /shop'
 'Обладатели Делюкс-статуса или более высокой привилегии имеют доступ ко всем кастомным иконкам убийств: Лиса, Пинок, Рыба, Вертуха, Череп, Череп 2, Кирка, Ковбой, Калькулятор': 'Owners of Deluxe status or higher privilege have access to all custom icons of kills: Fox, Kick, Fish, Turntable, Skull, Skull 2, Pickaxe, Cowboy, Calculator'
 Больше кастомных скинов: 'More custom skins'
 Обладатели Делюкс-статуса имеют доступ ко всем кастомным скинам: 'Deluxe status holders have access to all custom skins'
@@ -146,9 +151,5 @@ Compare your time with the time on the site time.is . If your watch is more than
 
 # * ClanCreate
 Доступ к созданию кланов, хитмаркеру, колесу чата и 5% скидке в /shop: 'Access to clan creation, hitmarkers, chat wheel and 5% discount in /shop'
-Хитмаркер: 'Hitmarker'
-Обладатели Доступа к кланам или более высокой привилегии имеют доступ к хитмаркеру, показывающему крестик при попадание в противниках: 'Holders of Access to clans or a higher privilege have access to a hitmarker that shows a cross when hitting opponents'
 Обладатели Доступа к кланам имеют доступ к нескольким префиксам на выбор: 'Clan Access holders have access to multiple prefixes to choose from'
-Колесо чата: 'Chat Wheel'
-Обладатели Доступа к кланам или более высокой привилегии имеют доступ к нескольким префиксам на выбор: 'Holders of Clan Access or higher privilege have access to multiple prefixes to choose from'
 У обладателей Доступа к кланам действует 5% скидка в /shop: 'The owners of Access to clans have a 5% discount in /shop'
