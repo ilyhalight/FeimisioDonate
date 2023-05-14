@@ -9,9 +9,7 @@
   const { t } = useI18n();
 
   // TODO: Make its loading on client (edits by server)
-  const donateList = await useAsyncData(async () => {
-    return await getPrivileges();
-  });
+  const donateList = await getPrivileges();
 
   const selected = ref({
     uid: 1,
@@ -41,8 +39,8 @@
 </script>
 
 <template>
-  <section v-if="donateList.data.value.length" class="donates">
-    <figure class="card" v-for="donate in donateList.data.value" :key="donate.uid" @click="selected.uid = donate.uid; selected.name = donate.name; selected.price = donate.price; promoCode = ''; open();">
+  <section v-if="donateList.length" class="donates">
+    <figure class="card" v-for="donate in donateList" :key="donate.uid" @click="selected.uid = donate.uid; selected.name = donate.name; selected.price = donate.price; promoCode = ''; open();">
       <div class="card-image">
         <img
           :src="donate.image && donate.image.length ? donate.image : '/images/crown.svg'"
