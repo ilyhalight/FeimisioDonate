@@ -16,6 +16,11 @@
             "gid": 0
         },
         {
+            "name": "FameBirthday",
+            "priority": 2,
+            "gid": 0
+        },
+        {
             "name": "Premium",
             "priority": 3,
             "gid": 0
@@ -23,6 +28,11 @@
         {
             "name": "Deluxe",
             "priority": 4,
+            "gid": 0
+        },
+        {
+            "name": "Rubidium",
+            "priority": 5,
             "gid": 0
         },
         {
