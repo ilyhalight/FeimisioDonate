@@ -55,7 +55,6 @@ Could not get information about available payment systems. Inform the administra
 API Error: 'Помилка API'
 Possible solution: 'Можливе рішення'
 Compare your time with the time on the site time.is . If your watch is more than 30 seconds behind, then you will not be able to interact with our site.: 'Порівняйте свій час із часом на сайті time.is. якщо ваш годинник відстає більш ніж на 30 секунд, то ви не зможете взаємодіяти з нашим сайтом.'
-Could not get information about available privileges. Report the error to the project administration.: 'Не вдалося отримати інформацію про доступні привілеї. Повідомте про помилку адміністрації проекту.'
 
 # ! MY TEXTS FROM DB (REPLACE THIS WITH YOUR TEXTS)
 # * VIP
