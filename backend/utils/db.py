@@ -13,10 +13,11 @@ log = logging.getLogger('worker')
 async def save_privileges_to_json():
     """Сохраняет доступные привилегии из базы данных в json файл"""
     privileges = await DbPrivilegeController().get_all()
-    async with aiofiles.open('config/privileges.json', 'w', encoding = 'utf-8') as f:
-        await f.write(json.dumps(privileges, indent=4))
-        log.info('privileges saved to json')
-        await f.close()
+    if privileges:
+        async with aiofiles.open('config/privileges.json', 'w', encoding = 'utf-8') as f:
+            await f.write(json.dumps(privileges, indent=4))
+            log.info('privileges saved to json')
+            await f.close()
 
 async def get_privileges_json():
     """Возвращает доступные привилегии из json файла"""
@@ -39,10 +40,11 @@ async def find_privileges_json(uid: int):
 async def save_privileges_info_to_json():
     """Сохраняет информацию о привилегии из базы данных в json файл"""
     privileges = await DbPrivilegeInfoController().get_all()
-    async with aiofiles.open('config/privileges_info.json', 'w', encoding = 'utf-8') as f:
-        await f.write(json.dumps(privileges, indent=4))
-        log.info('privileges info saved to json')
-        await f.close()
+    if privileges:
+        async with aiofiles.open('config/privileges_info.json', 'w', encoding = 'utf-8') as f:
+            await f.write(json.dumps(privileges, indent=4))
+            log.info('privileges info saved to json')
+            await f.close()
 
 async def get_privileges_info_json():
     """Возвращает информацию о привилегии из json файла"""
@@ -66,18 +68,20 @@ async def find_privileges_info_json(link: str):
 async def save_promocodes_to_json():
     """Сохраняет доступные промокоды из базы данных в json файл"""
     promocodes = await DbPromocodesController().get_all()
-    async with aiofiles.open('config/promocodes.json', 'w', encoding = 'utf-8') as f:
-        await f.write(json.dumps(promocodes, indent=4))
-        log.info('promocodes saved to json')
-        await f.close()
+    if promocodes:
+        async with aiofiles.open('config/promocodes.json', 'w', encoding = 'utf-8') as f:
+            await f.write(json.dumps(promocodes, indent=4))
+            log.info('promocodes saved to json')
+            await f.close()
 
 async def save_payment_systems_to_json():
     """Сохраняет доступные платежки из базы данных в json файл"""
     payment_systems = await DbPaymentSystemsController().get_all()
-    async with aiofiles.open('config/payment_systems.json', 'w', encoding = 'utf-8') as f:
-        await f.write(json.dumps(payment_systems, indent=4))
-        log.info('payment systems saved to json')
-        await f.close()
+    if payment_systems:
+        async with aiofiles.open('config/payment_systems.json', 'w', encoding = 'utf-8') as f:
+            await f.write(json.dumps(payment_systems, indent=4))
+            log.info('payment systems saved to json')
+            await f.close()
 
 async def get_payment_systems_json():
     """Возвращает доступные платежки из json файла"""
