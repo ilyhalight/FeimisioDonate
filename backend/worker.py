@@ -25,7 +25,7 @@ def init_worker():
         log.info('DB initialized')
 
     @app.on_event("startup")
-    @repeat_every(seconds = 60 * 5)  # 5 min
+    @repeat_every(seconds = 60 * 2)  # 2 min
     async def worker():
         log.info('Recache worker started')
         await save_privileges_to_json()
